@@ -13,7 +13,7 @@ for (var i = 0; i < 4; i++) {
 }
 
 for (var i = 4; i < 8; i++) {
-  checkerArray[i] = createChecker(("red" + i), "red", "65px", ((i % 4) * 100 + 15) + "px"); 
+  checkerArray[i] = createChecker(("red" + i), "red", "65px", ((i % 4) * 100 + 15) + "px");
   occupiedArray[1][(i - 4) * 2] = true;
 }
 
@@ -36,7 +36,7 @@ for (var i = 12; i < 16; i++) {
 }
 
 for (var i = 16; i < 20; i++) {
-  checkerArray[i] = createChecker(("black" + i), "black", "315px", ((i % 4) * 100 + 65) + "px"); 
+  checkerArray[i] = createChecker(("black" + i), "black", "315px", ((i % 4) * 100 + 65) + "px");
 occupiedArray[6][(i - 16) * 2 + 1] = true;
 }
 
@@ -91,7 +91,7 @@ function drop(event) {
       document.getElementById(data).style.top = (Math.floor(y / 50) * 50 + 15) + "px";
       document.getElementById(data).style.left = (Math.floor(x / 50) * 50 + 15) + "px";
       occupiedArray[dragY][dragX] = false;
-      occupiedArray[((y - 15) / 50)][((x - 15) / 50)] = true;
+      occupiedArray[Math.floor((y - 15) / 50)][Math.floor((x - 15) / 50)] = true;
     }
   }
   else if (occupiedArray[Math.floor((y - 15) / 50)][Math.floor((x - 15) / 50)] == false) {
@@ -99,7 +99,7 @@ function drop(event) {
       document.getElementById(data).style.top = (Math.floor(y / 50) * 50 + 15) + "px";
       document.getElementById(data).style.left = (Math.floor(x / 50) * 50 + 15) + "px";
       occupiedArray[dragY][dragX] = false;
-      occupiedArray[((y - 15) / 50)][((x - 15) / 50)] = true;
+      occupiedArray[Math.floor((y - 15) / 50)][Math.floor((x - 15) / 50)] = true;
     }
   }
 }
@@ -114,11 +114,11 @@ function createChecker(id, color, tposition, lposition) {
   var image = document.createElement("IMG");
   image.id = id;
   if (color == "black") {
-    image.src = "http://i349.photobucket.com/albums/q391/Glenn_Q_Hurd/black_checker_zps5jhvmfod.png";
+    image.src = "images/black_checker.png";
     image.alt = "Black";
   }
   else if (color == "red"){
-    image.src = "http://i349.photobucket.com/albums/q391/Glenn_Q_Hurd/red_checker_zpsogdbhfbj.png";
+    image.src = "images/red_checker.png";
     image.alt = "Red";
   }
   document.getElementById("boardset").appendChild(image);
