@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Lily's Checker Board</title>
-  
-  
-  
+
+
+
       <link rel="stylesheet" href="css/style.css">
 
-  
+
 </head>
 
 <body>
@@ -20,12 +20,24 @@
 	<body>
     <div id="boardset">
       <canvas width=400 height=400 id="checkerboard" ondrop="drop(event)" ondragover="allowDrop(event)" z-axis=-20>
-       Your browser does not support the HTML5 
+       Your browser does not support the HTML5
       </canvas>
+    </div>
+    <div>
+        <p>
+            This is a program currently in progress by Glenn Hurd.  Currently you
+            can click and drag each checker image like you would playing the game,
+            one space at a time and jumping over the other pieces.  Next up is
+            turning pieces into kings and capturing pieces when they reach the end.
+        </p>
+        <p>
+            Update: Checkers can now become kings when reaching the other end of the board
+            and can then move backwards and forwards freely as well as jump opponent's pieces.
+        </p>
     </div>
 	</body>
 </html>
-  
+
     <script src="js/index.js"></script>
 
 </body>
