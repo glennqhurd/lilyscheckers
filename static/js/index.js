@@ -128,137 +128,140 @@ function createChecker(id, color, tposition, lposition) {
 }
 
 function calculateMove(x, y, data) {
-  var floorY = Math.floor((y - 15) / 50);
-  var floorX = Math.floor((x - 15) / 50);
-  if (((Math.floor(y / 50) % 2 == 0) && (Math.floor(x / 50) % 2 == 1)) || (Math.floor(y / 50) % 2 == 1) && (Math.floor(x / 50) % 2 == 0)) {
-    console.log(occupiedArray[floorY][floorX]);
-    if (occupiedArray[floorY][floorX] == "none") {
-      console.log("X displacement is: " + (dragX - floorX));
-      if (((dragX - floorX) == -1) || ((dragX - floorX) == 1)) {
-        console.log("Y displacement is: " + (dragY - floorY));
-        console.log("Current color is: " + currentColor);
-        if (((dragY - floorY) == -1) && (currentColor == "red")) {
-          document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-          document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-          occupiedArray[dragY][dragX] = "none";
-          occupiedArray[floorY][floorX] = currentColor;
-          if (floorY == 7 && isAKing == false) {
-              kingAPiece(data);
-          }
-        }
-        else if (((dragY - floorY) == 1) && (currentColor == "black")) {
-          document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-          document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-          occupiedArray[dragY][dragX] = "none";
-          occupiedArray[floorY][floorX] = currentColor;
-          if (floorY == 0 && isAKing == false) {
-              kingAPiece(data);
-          }
-        }
-        else {
-          document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-          document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-          occupiedArray[dragY][dragX] = "none";
-          occupiedArray[floorY][floorX] = currentColor;
-        }
-      }
-      else if (((dragX - floorX) == -2) || ((dragX - floorX) == 2)) {
-        console.log("Current color is: " + currentColor);
-        console.log("Y displacement is: " + (dragY - floorY));
-        console.log("floorY is: " + floorY);
-        if (((dragY - floorY) == -2) && (currentColor == "red")) {
-          console.log("occupiedArray left: " + (occupiedArray[floorY - 1][floorX - 1]));
-          console.log("occupiedArray right: " + (occupiedArray[floorY - 1][floorX + 1]));
-          if (occupiedArray[floorY - 1][floorX - 1] == "black") {
-            document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-            document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-            occupiedArray[dragY][dragX] = "none";
-            occupiedArray[floorY][floorX] = currentColor;
-            if (floorY == 7 && isAKing == false) {
-              kingAPiece(data);
-            }
-          }
-          else if (occupiedArray[floorY - 1][floorX + 1] == "black") {
-            document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-            document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-            occupiedArray[dragY][dragX] = "none";
-            occupiedArray[floorY][floorX] = currentColor;
-            if (floorY == 7 && isAKing == false) {
-              kingAPiece(data);
-            }
-          }
-        }
-        else if (((dragY - floorY) == 2) && (currentColor == "black")) {
-          if (occupiedArray[floorY + 1][floorX - 1] == "red") {
-            console.log("Entered part 1");
-            document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-            document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-            occupiedArray[dragY][dragX] = "none";
-            occupiedArray[floorY][floorX] = currentColor;
-            if (floorY == 0 && isAKing == false) {
-              kingAPiece(data);
-            }
-          }
-          else if (occupiedArray[floorY + 1][floorX + 1] == "red") {
-            console.log("Entered part 2");
-            document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-            document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-            occupiedArray[dragY][dragX] = "none";
-            occupiedArray[floorY][floorX] = currentColor;
-            if (floorY == 0 && isAKing == false) {
-              kingAPiece(data);
-            }
-          }
-        }
-        else if ((dragY - floorY == 2) && (currentColor == "red")) {
-          if (occupiedArray[floorY + 1][floorX - 1] == "black") {
-            document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-            document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-            occupiedArray[dragY][dragX] = "none";
-            occupiedArray[floorY][floorX] = currentColor;
-          }
-          else if (occupiedArray[floorY + 1][floorX + 1] == "black") {
-            document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-            document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-            occupiedArray[dragY][dragX] = "none";
-            occupiedArray[floorY][floorX] = currentColor;
-          }
-        }
-        else if ((dragY - floorY == -2) && (currentColor == "black")) {
-          if (occupiedArray[floorY + 1][floorX - 1] == "red") {
-            document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-            document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-            occupiedArray[dragY][dragX] = "none";
-            occupiedArray[floorY][floorX] = currentColor;
-            if (floorY == 0 && isAKing == false) {
-              kingAPiece(data);
-            }
-          }
-          else if (occupiedArray[floorY + 1][floorX + 1] == "red") {
-            document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-            document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-            occupiedArray[dragY][dragX] = "none";
-            occupiedArray[floorY][floorX] = currentColor;
-            if (floorY == 0 && isAKing == false) {
-              kingAPiece(data);
-            }
-          }
-        }
-      }
-    }
+  console.log(isLegalMove(x, y));
+  if (isLegalMove(x, y) == true) {
+    makeMove(x, y, data);
   }
 }
 
 function kingAPiece(data) {
+  if (document.getElementById(data).className.split(" ")[1] != null) {
     if (document.getElementById(data).className == "red") {
-        document.getElementById(data).src = "images/red_king.png";
-        document.getElementById(data).className += " king";
+      document.getElementById(data).src = "images/red_king.png";
+    } else {
+      document.getElementById(data).src = "images/black_king.png";
     }
-    else if (document.getElementById(data).className == "black") {
-        document.getElementById(data).src = "images/black_king.png";
-        document.getElementById(data).className += " king";
+    document.getElementById(data).className += " king"
+  }
+}
+
+function isLegalMove(x, y) {
+  var floorY = Math.floor((y - 15) / 50);
+  var floorX = Math.floor((x - 15) / 50);
+  if (!((Math.floor(y / 50) % 2 == 0) && (Math.floor(x / 50) % 2 == 1)) && !(Math.floor(y / 50) % 2 == 1) && (Math.floor(x / 50) % 2 == 0)) {
+    console.log("false because wrong panel");
+    return false;
+  }
+  if (!(occupiedArray[floorY][floorX] == "none")) {
+    console.log("false because occupied");
+    return false;
+  }
+  if (!((Math.abs(dragX - floorX) == 1) && (Math.abs(dragY - floorY) == 1)) && !((Math.abs(dragX - floorX) == 2) && (Math.abs(dragY - floorY) == 2))) {
+    console.log("false because placed too far");
+    return false;
+  }
+  if (isAKing == false) {
+    if ((((dragY - floorY) == -1) && (currentColor == "red")) || (((dragY - floorY) == -2) && (currentColor == "red")) ) {
+      return true;
+    }
+    else if ((((dragY - floorY) == 1) && (currentColor == "black")) || (((dragY - floorY) == 2) && (currentColor == "black"))) {
+      return true;
     }
     else {
-        alert("Error, kingAPiece not working.");
+      console.log("false because piece cannot move backward");
+      return false;
     }
+  }
+  return true;
+}
+
+function makeMove(x, y, data) {
+  var floorY = Math.floor((y - 15) / 50);
+  var floorX = Math.floor((x - 15) / 50);
+  if (((dragY - floorY) == -1) && (currentColor == "red")) {
+    document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+    document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+    occupiedArray[dragY][dragX] = "none";
+    occupiedArray[floorY][floorX] = currentColor;
+  }
+  else if (((dragY - floorY) == 1) && (currentColor == "black")) {
+    document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+    document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+    occupiedArray[dragY][dragX] = "none";
+    occupiedArray[floorY][floorX] = currentColor;
+  }
+  else if (((dragX - floorX) == -2) || ((dragX - floorX) == 2)) {
+    console.log("Current color is: " + currentColor);
+    console.log("Y displacement is: " + (dragY - floorY));
+    console.log("floorY is: " + floorY);
+    if (((dragY - floorY) == -2) && (currentColor == "red")) {
+      console.log("occupiedArray left: " + (occupiedArray[floorY - 1][floorX - 1]));
+      console.log("occupiedArray right: " + (occupiedArray[floorY - 1][floorX + 1]));
+      if (occupiedArray[floorY - 1][floorX - 1] == "black") {
+        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY][floorX] = currentColor;
+      }
+      else if (occupiedArray[floorY - 1][floorX + 1] == "black") {
+        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY][floorX] = currentColor;
+      }
+    }
+    else if (((dragY - floorY) == 2) && (currentColor == "black")) {
+      if (occupiedArray[floorY + 1][floorX - 1] == "red") {
+        console.log("Entered part 1");
+        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY][floorX] = currentColor;
+      }
+      else if (occupiedArray[floorY + 1][floorX + 1] == "red") {
+        console.log("Entered part 2");
+        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY][floorX] = currentColor;
+      }
+    }
+    else if ((dragY - floorY == 2) && (currentColor == "red")) {
+      if (occupiedArray[floorY + 1][floorX - 1] == "black") {
+        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY][floorX] = currentColor;
+      }
+      else if (occupiedArray[floorY + 1][floorX + 1] == "black") {
+        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY][floorX] = currentColor;
+      }
+    }
+    else if ((dragY - floorY == -2) && (currentColor == "black")) {
+      if (occupiedArray[floorY + 1][floorX - 1] == "red") {
+        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY][floorX] = currentColor;
+      }
+      else if (occupiedArray[floorY + 1][floorX + 1] == "red") {
+        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY][floorX] = currentColor;
+      }
+    }
+  }
+  else if (isAKing == true) {
+    document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+    document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+    occupiedArray[dragY][dragX] = "none";
+    occupiedArray[floorY][floorX] = currentColor;
+  }
+  if ((floorY == 7) || (floorY == 0) && (isAKing == false)) {
+      kingAPiece(data);
+  }
 }
