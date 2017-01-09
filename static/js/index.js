@@ -81,7 +81,7 @@ function drag(event) {
   dragY = Math.floor((event.clientY - 15) / 50);
   var checkerObject = document.getElementById(event.target.id);
   currentColor = checkerObject.className.split(" ")[0];
-  if (checkerObject.className.split(" ")[1] != null) {
+  if (checkerObject.classList.contains("king")) {
       isAKing = true;
   }
   else {
@@ -141,7 +141,7 @@ function kingAPiece(data) {
     } else {
       document.getElementById(data).src = "images/black_king.png";
     }
-    document.getElementById(data).className += " king"
+    document.getElementById(data).classList.add("king");
   }
 }
 
