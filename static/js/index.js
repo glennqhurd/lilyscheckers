@@ -11,17 +11,17 @@ for (var i = 0; i < 8; i++) {
 
 for (var i = 0; i < 4; i++) {
   checkerArray[i] = createChecker(("red" + i), "red", "15px", ((i % 4) * 100 + 65) + "px");
-  occupiedArray[0][i * 2 + 1] = "red";
+  occupiedArray[0][i * 2 + 1] = checkerArray[i];
 }
 
 for (var i = 4; i < 8; i++) {
   checkerArray[i] = createChecker(("red" + i), "red", "65px", ((i % 4) * 100 + 15) + "px");
-  occupiedArray[1][(i - 4) * 2] = "red";
+  occupiedArray[1][(i - 4) * 2] = checkerArray[i];
 }
 
 for (var i = 8; i < 12; i++) {
   checkerArray[i] = createChecker(("red" + i), "red", "115px", ((i % 4) * 100 + 65) + "px");
-  occupiedArray[2][(i - 8) * 2 + 1] = "red";
+  occupiedArray[2][(i - 8) * 2 + 1] = checkerArray[i];
 }
 
 for (var i = 0; i < 4; i++) {
@@ -34,17 +34,17 @@ for (var i = 0; i < 4; i++) {
 
 for (var i = 12; i < 16; i++) {
   checkerArray[i] = createChecker(("black" + i), "black", "265px", ((i % 4) * 100 + 15) + "px");
-  occupiedArray[5][(i - 12) * 2] = "black";
+  occupiedArray[5][(i - 12) * 2] = checkerArray[i];
 }
 
 for (var i = 16; i < 20; i++) {
   checkerArray[i] = createChecker(("black" + i), "black", "315px", ((i % 4) * 100 + 65) + "px");
-occupiedArray[6][(i - 16) * 2 + 1] = "black";
+occupiedArray[6][(i - 16) * 2 + 1] = checkerArray[i];
 }
 
 for (var i = 20; i < 24; i++) {
   checkerArray[i] = createChecker(("black" + i), "black", "365px", ((i % 4) * 100 + 15) + "px");
-  occupiedArray[7][(i - 20) * 2] = "black";
+  occupiedArray[7][(i - 20) * 2] = checkerArray[i];
 }
 
 window.onload = function() {
@@ -91,13 +91,15 @@ function drag(event) {
 }
 
 function drop(event) {
-  event.preventDefault();
   var data = event.dataTransfer.getData("Text");
   var x = event.clientX;
   var y = event.clientY;
   console.log("Value of x: " + x);
   console.log("Value of y: " + y);
-  calculateMove(x, y, data);
+  if (isLegalMove(x, y)) {
+    event.preventDefault();
+    makeMove(x, y, data);
+  }
 }
 
 //To center image in square add 5 to x and y after multiplying row and column index by 50 each (starting at 0)
@@ -127,16 +129,9 @@ function createChecker(id, color, tposition, lposition) {
   return image;
 }
 
-function calculateMove(x, y, data) {
-  console.log(isLegalMove(x, y));
-  if (isLegalMove(x, y) == true) {
-    makeMove(x, y, data);
-  }
-}
-
 function kingAPiece(data) {
-  if (document.getElementById(data).className.split(" ")[1] != null) {
-    if (document.getElementById(data).className == "red") {
+  if (!document.getElementById(data).classList.contains("king")) {
+    if (document.getElementById(data).classList.contains("red")) {
       document.getElementById(data).src = "images/red_king.png";
     } else {
       document.getElementById(data).src = "images/black_king.png";
@@ -152,7 +147,7 @@ function isLegalMove(x, y) {
     console.log("false because wrong panel");
     return false;
   }
-  if (!(occupiedArray[floorY][floorX] == "none")) {
+  if (occupiedArray[floorY][floorX] != "none") {
     console.log("false because occupied");
     return false;
   }
@@ -178,17 +173,23 @@ function isLegalMove(x, y) {
 function makeMove(x, y, data) {
   var floorY = Math.floor((y - 15) / 50);
   var floorX = Math.floor((x - 15) / 50);
-  if (((dragY - floorY) == -1) && (currentColor == "red")) {
+  if (isAKing == true) {
     document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
     document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+    occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
     occupiedArray[dragY][dragX] = "none";
-    occupiedArray[floorY][floorX] = currentColor;
+  }
+  else if (((dragY - floorY) == -1) && (currentColor == "red")) {
+    document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
+    document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+    occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
+    occupiedArray[dragY][dragX] = "none";
   }
   else if (((dragY - floorY) == 1) && (currentColor == "black")) {
     document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
     document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+    occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
     occupiedArray[dragY][dragX] = "none";
-    occupiedArray[floorY][floorX] = currentColor;
   }
   else if (((dragX - floorX) == -2) || ((dragX - floorX) == 2)) {
     console.log("Current color is: " + currentColor);
@@ -197,71 +198,66 @@ function makeMove(x, y, data) {
     if (((dragY - floorY) == -2) && (currentColor == "red")) {
       console.log("occupiedArray left: " + (occupiedArray[floorY - 1][floorX - 1]));
       console.log("occupiedArray right: " + (occupiedArray[floorY - 1][floorX + 1]));
-      if (occupiedArray[floorY - 1][floorX - 1] == "black") {
+      if (occupiedArray[floorY - 1][floorX - 1].classList.contains("black")) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
         occupiedArray[dragY][dragX] = "none";
-        occupiedArray[floorY][floorX] = currentColor;
       }
-      else if (occupiedArray[floorY - 1][floorX + 1] == "black") {
+      else if (occupiedArray[floorY - 1][floorX + 1].classList.contains("black")) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
         occupiedArray[dragY][dragX] = "none";
-        occupiedArray[floorY][floorX] = currentColor;
       }
     }
     else if (((dragY - floorY) == 2) && (currentColor == "black")) {
-      if (occupiedArray[floorY + 1][floorX - 1] == "red") {
+      if (occupiedArray[floorY + 1][floorX - 1].classList.contains("red")) {
         console.log("Entered part 1");
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
         occupiedArray[dragY][dragX] = "none";
-        occupiedArray[floorY][floorX] = currentColor;
       }
-      else if (occupiedArray[floorY + 1][floorX + 1] == "red") {
+      else if (occupiedArray[floorY + 1][floorX + 1].classList.contains("red")) {
         console.log("Entered part 2");
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
         occupiedArray[dragY][dragX] = "none";
-        occupiedArray[floorY][floorX] = currentColor;
       }
     }
     else if ((dragY - floorY == 2) && (currentColor == "red")) {
-      if (occupiedArray[floorY + 1][floorX - 1] == "black") {
+      if (occupiedArray[floorY + 1][floorX - 1].classList("black")) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
         occupiedArray[dragY][dragX] = "none";
-        occupiedArray[floorY][floorX] = currentColor;
       }
-      else if (occupiedArray[floorY + 1][floorX + 1] == "black") {
+      else if (occupiedArray[floorY + 1][floorX + 1].classList("black")) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
         occupiedArray[dragY][dragX] = "none";
-        occupiedArray[floorY][floorX] = currentColor;
       }
     }
     else if ((dragY - floorY == -2) && (currentColor == "black")) {
-      if (occupiedArray[floorY + 1][floorX - 1] == "red") {
+      if (occupiedArray[floorY + 1][floorX - 1].classList.contains("red")) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
         occupiedArray[dragY][dragX] = "none";
-        occupiedArray[floorY][floorX] = currentColor;
       }
-      else if (occupiedArray[floorY + 1][floorX + 1] == "red") {
+      else if (occupiedArray[floorY + 1][floorX + 1].classList.contains("red")) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
+        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
         occupiedArray[dragY][dragX] = "none";
-        occupiedArray[floorY][floorX] = currentColor;
       }
     }
   }
-  else if (isAKing == true) {
-    document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-    document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-    occupiedArray[dragY][dragX] = "none";
-    occupiedArray[floorY][floorX] = currentColor;
-  }
-  if ((floorY == 7) || (floorY == 0) && (isAKing == false)) {
+  console.log("Reached this point");
+  if (((floorY == 7) || (floorY == 0)) && (isAKing == false)) {
       kingAPiece(data);
   }
 }
