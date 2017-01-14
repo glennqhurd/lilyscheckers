@@ -25,11 +25,11 @@ for (var i = 8; i < 12; i++) {
 }
 
 for (var i = 0; i < 4; i++) {
-  occupiedArray[3][i * 2] = "none";
+  occupiedArray[3][i * 2] = null;
 }
 
 for (var i = 0; i < 4; i++) {
-  occupiedArray[4][i * 2 + 1] = "none";
+  occupiedArray[4][i * 2 + 1] = null;
 }
 
 for (var i = 12; i < 16; i++) {
@@ -87,15 +87,12 @@ function drag(event) {
   else {
       isAKing = false;
   }
-  console.log(currentColor);
 }
 
 function drop(event) {
   var data = event.dataTransfer.getData("Text");
   var x = event.clientX;
   var y = event.clientY;
-  console.log("Value of x: " + x);
-  console.log("Value of y: " + y);
   if (isLegalMove(x, y)) {
     event.preventDefault();
     makeMove(x, y, data);
@@ -144,26 +141,22 @@ function isLegalMove(x, y) {
   var floorY = Math.floor((y - 15) / 50);
   var floorX = Math.floor((x - 15) / 50);
   if (!((Math.floor(y / 50) % 2 == 0) && (Math.floor(x / 50) % 2 == 1)) && !(Math.floor(y / 50) % 2 == 1) && (Math.floor(x / 50) % 2 == 0)) {
-    console.log("false because wrong panel");
     return false;
   }
-  if (occupiedArray[floorY][floorX] != "none") {
-    console.log("false because occupied");
+  if (occupiedArray[floorY][floorX] != null) {
     return false;
   }
   if (!((Math.abs(dragX - floorX) == 1) && (Math.abs(dragY - floorY) == 1)) && !((Math.abs(dragX - floorX) == 2) && (Math.abs(dragY - floorY) == 2))) {
-    console.log("false because placed too far");
     return false;
   }
   if (isAKing == false) {
-    if ((((dragY - floorY) == -1) && (currentColor == "red")) || (((dragY - floorY) == -2) && (currentColor == "red")) ) {
+    if ((((dragY - floorY) == -1) || ((dragY - floorY) == -2)) && (currentColor == "red")) {
       return true;
     }
-    else if ((((dragY - floorY) == 1) && (currentColor == "black")) || (((dragY - floorY) == 2) && (currentColor == "black"))) {
+    else if ((((dragY - floorY) == 1) || ((dragY - floorY) == 2)) && (currentColor == "black")) {
       return true;
     }
     else {
-      console.log("false because piece cannot move backward");
       return false;
     }
   }
@@ -173,90 +166,62 @@ function isLegalMove(x, y) {
 function makeMove(x, y, data) {
   var floorY = Math.floor((y - 15) / 50);
   var floorX = Math.floor((x - 15) / 50);
-  if (isAKing == true) {
+  if ((isAKing == true) && (Math.abs((dragX - floorX/2) == 1))) {
     document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
     document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
     occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-    occupiedArray[dragY][dragX] = "none";
+    occupiedArray[dragY][dragX] = null;
   }
   else if (((dragY - floorY) == -1) && (currentColor == "red")) {
     document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
     document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
     occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-    occupiedArray[dragY][dragX] = "none";
+    occupiedArray[dragY][dragX] = null;
   }
   else if (((dragY - floorY) == 1) && (currentColor == "black")) {
     document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
     document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
     occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-    occupiedArray[dragY][dragX] = "none";
+    occupiedArray[dragY][dragX] = null;
   }
-  else if (((dragX - floorX) == -2) || ((dragX - floorX) == 2)) {
-    console.log("Current color is: " + currentColor);
-    console.log("Y displacement is: " + (dragY - floorY));
-    console.log("floorY is: " + floorY);
-    if (((dragY - floorY) == -2) && (currentColor == "red")) {
-      console.log("occupiedArray left: " + (occupiedArray[floorY - 1][floorX - 1]));
-      console.log("occupiedArray right: " + (occupiedArray[floorY - 1][floorX + 1]));
-      if (occupiedArray[floorY - 1][floorX - 1].classList.contains("black")) {
+  else if (Math.abs((dragX - floorX)/2) == 1) {
+    else if (((dragY - floorY) == -2) && (currentColor == "red")) {
+      if (((floorX - dragX) == 2) && (occupiedArray[floorY - 1][floorX - 1].classList.contains("black"))) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
         occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[dragY][dragX] = null;
+        occupiedArray[floorY - 1][floorX - 1].parentNode.removeChild(occupiedArray[floorY - 1][floorX - 1]);
+        occupiedArray[floorY - 1][floorX - 1] = null;
       }
-      else if (occupiedArray[floorY - 1][floorX + 1].classList.contains("black")) {
+      else if (((floorX - dragX) == -2) && (occupiedArray[floorY - 1][floorX + 1].classList.contains("black"))) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
         occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[dragY][dragX] = null;
+        occupiedArray[floorY - 1][floorX + 1].parentNode.removeChild(occupiedArray[floorY - 1][floorX + 1]);
+        occupiedArray[floorY - 1][floorX + 1] = null;
       }
     }
     else if (((dragY - floorY) == 2) && (currentColor == "black")) {
-      if (occupiedArray[floorY + 1][floorX - 1].classList.contains("red")) {
-        console.log("Entered part 1");
+      if (((floorX - dragX) == 2) && occupiedArray[floorY + 1][floorX - 1].classList.contains("red")) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
         occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY + 1][floorX - 1].parentNode.removeChild(occupiedArray[floorY - 1][floorX + 1]);
+        occupiedArray[dragY][dragX] = null;
+        occupiedArray[floorY + 1][floorX - 1] = null;
       }
-      else if (occupiedArray[floorY + 1][floorX + 1].classList.contains("red")) {
-        console.log("Entered part 2");
+      else if (((floorX - dragX) == -2) && occupiedArray[floorY + 1][floorX + 1].classList.contains("red")) {
         document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
         document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
         occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-        occupiedArray[dragY][dragX] = "none";
-      }
-    }
-    else if ((dragY - floorY == 2) && (currentColor == "red")) {
-      if (occupiedArray[floorY + 1][floorX - 1].classList("black")) {
-        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-        occupiedArray[dragY][dragX] = "none";
-      }
-      else if (occupiedArray[floorY + 1][floorX + 1].classList("black")) {
-        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-        occupiedArray[dragY][dragX] = "none";
-      }
-    }
-    else if ((dragY - floorY == -2) && (currentColor == "black")) {
-      if (occupiedArray[floorY + 1][floorX - 1].classList.contains("red")) {
-        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-        occupiedArray[dragY][dragX] = "none";
-      }
-      else if (occupiedArray[floorY + 1][floorX + 1].classList.contains("red")) {
-        document.getElementById(data).style.top = (Math.floor((y - 15) / 50) * 50 + 15) + "px";
-        document.getElementById(data).style.left = (Math.floor((x - 15) / 50) * 50 + 15) + "px";
-        occupiedArray[floorY][floorX] = occupiedArray[dragY][dragX];
-        occupiedArray[dragY][dragX] = "none";
+        occupiedArray[floorY + 1][floorX + 1].parentNode.removeChild(occupiedArray[floorY - 1][floorX + 1]);
+        occupiedArray[dragY][dragX] = null;
+        occupiedArray[floorY + 1][floorX + 1] = null;
       }
     }
   }
-  console.log("Reached this point");
   if (((floorY == 7) || (floorY == 0)) && (isAKing == false)) {
       kingAPiece(data);
   }
