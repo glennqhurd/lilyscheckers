@@ -177,13 +177,103 @@ function makeJumpMove(destRow, destCol, checkerId) {
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
   occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2] = null;
   occupiedArray[srcRow][srcCol] = null;
-  if (document.getElementById(checkerId).classList.contains("red")) {
-    currentColor = "black";
+  if (!checkAdjacent(destRow, destCol, checkerId)) {
+    if (document.getElementById(checkerId).classList.contains("red")) {
+      currentColor = "black";
+    }
+    else {
+      currentColor = "red";
+    }
+    document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
   }
-  else {
-    currentColor = "red";
+}
+
+function checkAdjacent(row, col, checkerId) {
+  if (isAKing(checkerId)) {
+    if ((occupiedArray[row + 1][col + 1] != null) && (occupiedArray[row + 2][col + 2] == null)) {
+      var adjacentId = occupiedArray[row + 1][col + 1].id;
+      if ((row > 5) || (col > 5)) {
+        return false;
+      }
+      else if (document.getElementById(adjacentId).classList.contains("red") && (currentColor = "black")) {
+        return true;
+      }
+      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor = "red")) {
+        return true;
+      }
+    }
+    else if ((occupiedArray[row + 1][col - 1] != null) && (occupiedArray[row + 2][col - 2] == null)) {
+      var adjacentId = occupiedArray[row + 1][col - 1].id;
+      if ((row > 5) || (col < 2)) {
+        return false;
+      }
+      else if (document.getElementById(adjacentId).classList.contains("red") && (currentColor = "black")) {
+        return true;
+      }
+      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor = "red")) {
+        return true;
+      }
+    }
+    else if ((occupiedArray[row - 1][col - 1] != null) && (occupiedArray[row - 2][col - 2] == null)) {
+      var adjacentId = occupiedArray[row - 1][col - 1].id;
+      if ((row < 2) || (col < 2)) {
+        return false;
+      }
+      else if (document.getElementById(adjacentId).classList.contains("red") && (currentColor = "black")) {
+        return true;
+      }
+      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor = "red")) {
+        return true;
+      }
+    }
+    else if ((occupiedArray[row - 1][col + 1] != null) && (occupiedArray[row - 2][col + 2] == null)) {
+      var adjacentId = occupiedArray[row - 1][col + 1].id;
+      if ((row < 2) || (col > 5)) {
+          return false;
+      }
+      else if (document.getElementById(adjacentId).classList.contains("red") && (currentColor = "black")) {
+        return true;
+      }
+      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor = "red")) {
+        return true;
+      }
+    }
   }
-  document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
+  else if (document.getElementById(checkerId).classList.contains("red")) {
+    if (row > 5) {
+      return false;
+    }
+    else if ((occupiedArray[row + 1][col - 1] != null) && (occupiedArray[row + 2][col - 2] == null) && (col >= 2)) {
+      var adjacentId = occupiedArray[row + 1][col - 1].id;
+      if (document.getElementById(adjacentId).classList.contains("black")) {
+        return true;
+      }
+    }
+    else if ((occupiedArray[row + 1][col + 1] != null) && (occupiedArray[row + 2][col + 2] == null) && (col <= 5)) {
+      var adjacentId = occupiedArray[row + 1][col + 1].id;
+      if (document.getElementById(adjacentId).classList.contains("black")) {
+        return true;
+      }
+    }
+  }
+  else if (document.getElementById(checkerId).classList.contains("black")) {
+    if (row < 2) {
+      return false;
+    }
+    else if ((occupiedArray[row - 1][col + 1] != null) && (occupiedArray[row - 2][col + 2] == null) && (col <= 5)) {
+      var adjacentId = occupiedArray[row - 1][col + 1].id;
+      if (document.getElementById(adjacentId).classList.contains("red")) {
+        return true;
+      }
+    }
+    else if ((occupiedArray[row - 1][col - 1] != null) && (occupiedArray[row - 2][col - 2] == null) && (col >= 2)) {
+      var adjacentId = occupiedArray[row - 1][col - 1].id;
+      if (document.getElementById(adjacentId).classList.contains("red")) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function isAKing(checkerId) {
