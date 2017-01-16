@@ -87,6 +87,9 @@ function drop(event) {
     else {
       moveCheckerToSquare(destRow, destCol, checkerId);
     }
+    if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
+      kingAPiece(checkerId);
+  }
   }
 }
 
@@ -207,9 +210,7 @@ function moveCheckerToSquare(col, row, checkerId) {
       }
     }
   }
-  if (((floorRow == 7) || (floorRow == 0)) && (!isAKing(document.getElementById(checker)))) {
-      kingAPiece(checkerId);
-  }
+
 }
 
 function makeSimpleMove(destRow, destCol, checkerId) {
