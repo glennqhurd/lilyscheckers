@@ -12,18 +12,18 @@ function setUpBoard () {
     var floorIndex = Math.floor(i/4);
     if (floorIndex < 3) {
       if (floorIndex % 2 == 0) {
-        occupiedArray[floorIndex][i * 2 + 1] = createChecker(("red" + i), "red", ((floorIndex * 50) + 15) + "px", ((i % 4) * 100 + 65) + "px");
+        occupiedArray[floorIndex][(i % 4) * 2 + 1] = createChecker(("red" + i), "red", ((floorIndex * 50) + 15) + "px", ((i % 4) * 100 + 65) + "px");
       }
       else {
-        occupiedArray[floorIndex][i * 2] = createChecker(("red" + i), "red", ((floorIndex * 50) + 15) + "px", ((i % 4) * 100 + 15) + "px");
+        occupiedArray[floorIndex][(i % 4) * 2] = createChecker(("red" + i), "red", ((floorIndex * 50) + 15) + "px", ((i % 4) * 100 + 15) + "px");
       }
     }
     else {
       if (floorIndex % 2 == 1) {
-          occupiedArray[floorIndex + 2][(i - 12) * 2] = createChecker(("black" + i), "black", ((floorIndex * 50) + 115) + "px", ((i % 4) * 100 + 15) + "px");
+          occupiedArray[floorIndex + 2][(i % 4) * 2] = createChecker(("black" + i), "black", ((floorIndex * 50) + 115) + "px", ((i % 4) * 100 + 15) + "px");
       }
       else {
-          occupiedArray[floorIndex + 2][(i - 12) * 2 + 1] = createChecker(("black" + i), "black", ((floorIndex * 50) + 115) + "px", ((i % 4) * 100 + 65) + "px");
+          occupiedArray[floorIndex + 2][(i % 4) * 2 + 1] = createChecker(("black" + i), "black", ((floorIndex * 50) + 115) + "px", ((i % 4) * 100 + 65) + "px");
       }
     }
   }
@@ -84,12 +84,12 @@ function drop(event) {
     if (Math.abs(destRow - srcRow) == 1) {
       makeSimpleMove(destRow, destCol, checkerId);
     }
-    else {
-      moveCheckerToSquare(destRow, destCol, checkerId);
+    else if (Math.abs(destRow - srcRow) == 2) {
+      makeSimpleMove(destRow, destCol, checkerId);
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
       kingAPiece(checkerId);
-  }
+    }
   }
 }
 
@@ -136,6 +136,11 @@ function isLegalMove(row, col, checkerId) {
   }
   if (!((Math.abs(srcCol - col) == 1) && (Math.abs(srcRow - row) == 1)) && !((Math.abs(srcCol - col) == 2) && (Math.abs(srcRow - row) == 2))) {
     return false;
+  }
+  if (((Math.abs(srcCol - col) == 2) && (Math.abs(srcRow - row) == 2))) {
+    if (occupiedArray[srcRow + (srcRow - row)/2][srcCol + (srcCol - col)/2] == null) {
+        return false;
+    }
   }
   if (!(isAKing(checkerId))) {
     if ((((srcRow - row) == -1) || ((srcRow - row) == -2)) && (currentColor == "red")) {
