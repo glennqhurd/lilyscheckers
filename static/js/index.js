@@ -85,7 +85,7 @@ function drop(event) {
       makeSimpleMove(destRow, destCol, checkerId);
     }
     else if (Math.abs(destRow - srcRow) == 2) {
-      makeSimpleMove(destRow, destCol, checkerId);
+      makeJumpMove(destRow, destCol, checkerId);
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
       kingAPiece(checkerId);
@@ -138,7 +138,9 @@ function isLegalMove(row, col, checkerId) {
     return false;
   }
   if (((Math.abs(srcCol - col) == 2) && (Math.abs(srcRow - row) == 2))) {
-    if (occupiedArray[srcRow + (srcRow - row)/2][srcCol + (srcCol - col)/2] == null) {
+      console.log("row: " + (row + (srcRow - row)/2));
+      console.log("col: " + (col + (srcCol - col)/2));
+    if (occupiedArray[row + (srcRow - row)/2][col + (srcCol - col)/2] == null) {
         return false;
     }
   }
@@ -222,6 +224,16 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   document.getElementById(checkerId).style.top = (destRow * 50 + 15) + "px";
   document.getElementById(checkerId).style.left = (destCol * 50 + 15) + "px";
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
+  occupiedArray[srcRow][srcCol] = null;
+}
+
+function makeJumpMove(destRow, destCol, checkerId) {
+  document.getElementById(checkerId).style.top = (destRow * 50 + 15) + "px";
+  document.getElementById(checkerId).style.left = (destCol * 50 + 15) + "px";
+  var jumpedId = occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2].id;
+  document.getElementById(jumpedId).style.display = "none";
+  occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
+  occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2] = null;
   occupiedArray[srcRow][srcCol] = null;
 }
 
