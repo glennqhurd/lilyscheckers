@@ -1,6 +1,6 @@
 var srcCol = 0;
 var srcRow = 0;
-var currentColor = "red";
+var currentColor = "black";
 // occupiedArray stores an 8x8 array that represents each board and whether or not it has a checker piece, each index is based off of Math.floor((y - 15) / 50) and Math.floor((x - 15) / 50)
 var occupiedArray = new Array(8);
 for (var i = 0; i < 8; i++) {
@@ -67,12 +67,6 @@ function drag(event) {
   srcCol = Math.floor((event.clientX - 15) / 50);
   srcRow = Math.floor((event.clientY - 15) / 50);
   var checkerObject = document.getElementById(event.target.id);
-  if (checkerObject.classList.contains("red")) {
-    currentColor = "red";
-  }
-  else {
-    currentColor = "black";
-  }
 }
 
 function drop(event) {
@@ -144,11 +138,14 @@ function isLegalMove(row, col, checkerId) {
         return false;
     }
   }
+  if (!document.getElementById(checkerId).classList.contains(currentColor)) {
+    return false;
+  }
   if (!(isAKing(checkerId))) {
-    if ((((srcRow - row) == -1) || ((srcRow - row) == -2)) && (currentColor == "red")) {
+    if ((((srcRow - row) == -1) || ((srcRow - row) == -2)) && (document.getElementById(checkerId).classList.contains("red"))) {
       return true;
     }
-    else if ((((srcRow - row) == 1) || ((srcRow - row) == 2)) && (currentColor == "black")) {
+    else if ((((srcRow - row) == 1) || ((srcRow - row) == 2)) && (document.getElementById(checkerId).classList.contains("black"))) {
       return true;
     }
     else {
@@ -158,73 +155,18 @@ function isLegalMove(row, col, checkerId) {
   return true;
 }
 
-function moveCheckerToSquare(col, row, checkerId) {
-  var floorRow = Math.floor((row - 15) / 50);
-  var floorCol = Math.floor((col - 15) / 50);
-  if ((isAKing(checkerId)) && (Math.abs((srcCol - floorCol/2) == 1))) {
-    document.getElementById(checkerId).style.top = (Math.floor((row - 15) / 50) * 50 + 15) + "px";
-    document.getElementById(checkerId).style.left = (Math.floor((col - 15) / 50) * 50 + 15) + "px";
-    occupiedArray[floorRow][floorCol] = occupiedArray[srcY][srcX];
-    occupiedArray[srcRow][srcCol] = null;
-  }
-  else if (((srcRow - floorRow) == -1) && (currentColor == "red")) {
-    document.getElementById(checkerId).style.top = (Math.floor((row - 15) / 50) * 50 + 15) + "px";
-    document.getElementById(checkerId).style.left = (Math.floor((col - 15) / 50) * 50 + 15) + "px";
-    occupiedArray[floorRow][floorCol] = occupiedArray[srcRow][srcCol];
-    occupiedArray[srcRow][srcCol] = null;
-  }
-  else if (((srcRow - floorRow) == 1) && (currentColor == "black")) {
-    document.getElementById(checkerId).style.top = (Math.floor((row - 15) / 50) * 50 + 15) + "px";
-    document.getElementById(checkerId).style.left = (Math.floor((col - 15) / 50) * 50 + 15) + "px";
-    occupiedArray[floorRow][floorCol] = occupiedArray[srcRow][srcCol];
-    occupiedArray[srcRow][srcCol] = null;
-  }
-  else if (Math.abs((srcCol - floorCol)/2) == 1) {
-    if (((srcRow - floorRow) == -2) && (currentColor == "red")) {
-      if (((floorCol - srcCol) == 2) && (occupiedArray[floorRow - 1][floorCol - 1].classList.contains("black"))) {
-        document.getElementById(checkerId).style.top = (Math.floor((row - 15) / 50) * 50 + 15) + "px";
-        document.getElementById(checkerId).style.left = (Math.floor((col - 15) / 50) * 50 + 15) + "px";
-        occupiedArray[floorRow][floorCol] = occupiedArray[srcRow][srcCol];
-        occupiedArray[srcRow][srcCol] = null;
-        occupiedArray[floorRow - 1][floorCol - 1].parentNode.removeChild(occupiedArray[floorRow - 1][floorCol - 1]);
-        occupiedArray[floorRow - 1][floorCol - 1] = null;
-      }
-      else if (((floorCol - srcCol) == -2) && (occupiedArray[floorRow - 1][floorCol + 1].classList.contains("black"))) {
-        document.getElementById(checkerId).style.top = (Math.floor((row - 15) / 50) * 50 + 15) + "px";
-        document.getElementById(checkerId).style.left = (Math.floor((col - 15) / 50) * 50 + 15) + "px";
-        occupiedArray[floorRow][floorCol] = occupiedArray[srcRow][srcCol];
-        occupiedArray[srcRow][srcCol] = null;
-        occupiedArray[floorRow - 1][floorCol + 1].parentNode.removeChild(occupiedArray[floorRow - 1][floorCol + 1]);
-        occupiedArray[floorRow - 1][floorCol + 1] = null;
-      }
-    }
-    else if (((srcRow - floorRow) == 2) && (currentColor == "black")) {
-      if (((floorCol - srcCol) == 2) && occupiedArray[floorRow + 1][floorCol - 1].classList.contains("red")) {
-        document.getElementById(checkerId).style.top = (Math.floor((row - 15) / 50) * 50 + 15) + "px";
-        document.getElementById(checkerId).style.left = (Math.floor((col - 15) / 50) * 50 + 15) + "px";
-        occupiedArray[floorRow][floorCol] = occupiedArray[srcRow][srcCol];
-        occupiedArray[floorRow + 1][floorCol - 1].parentNode.removeChild(occupiedArray[floorRow - 1][floorCol + 1]);
-        occupiedArray[srcRow][srcCol] = null;
-        occupiedArray[floorRow + 1][floorCol - 1] = null;
-      }
-      else if (((floorCol - srcCol) == -2) && occupiedArray[floorRow + 1][floorCol + 1].classList.contains("red")) {
-        document.getElementById(checkerId).style.top = (Math.floor((row - 15) / 50) * 50 + 15) + "px";
-        document.getElementById(checkerId).style.left = (Math.floor((col - 15) / 50) * 50 + 15) + "px";
-        occupiedArray[floorRow][floorCol] = occupiedArray[srcRow][srcCol];
-        occupiedArray[floorRow + 1][floorCol + 1].parentNode.removeChild(occupiedArray[floorRow - 1][floorCol + 1]);
-        occupiedArray[srcRow][srcCol] = null;
-        occupiedArray[floorRow + 1][floorCol + 1] = null;
-      }
-    }
-  }
-
-}
-
 function makeSimpleMove(destRow, destCol, checkerId) {
   document.getElementById(checkerId).style.top = (destRow * 50 + 15) + "px";
   document.getElementById(checkerId).style.left = (destCol * 50 + 15) + "px";
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
   occupiedArray[srcRow][srcCol] = null;
+  if (document.getElementById(checkerId).classList.contains("red")) {
+    currentColor = "black";
+  }
+  else {
+    currentColor = "red";
+  }
+  document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
 }
 
 function makeJumpMove(destRow, destCol, checkerId) {
@@ -235,6 +177,13 @@ function makeJumpMove(destRow, destCol, checkerId) {
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
   occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2] = null;
   occupiedArray[srcRow][srcCol] = null;
+  if (document.getElementById(checkerId).classList.contains("red")) {
+    currentColor = "black";
+  }
+  else {
+    currentColor = "red";
+  }
+  document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
 }
 
 function isAKing(checkerId) {
