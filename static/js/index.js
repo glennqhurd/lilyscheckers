@@ -1,6 +1,7 @@
 var srcCol = 0;
 var srcRow = 0;
 var currentColor = "black";
+var currentId = null;
 // occupiedArray stores an 8x8 array that represents each board and whether or not it has a checker piece, each index is based off of Math.floor((y - 15) / 50) and Math.floor((x - 15) / 50)
 var occupiedArray = new Array(8);
 for (var i = 0; i < 8; i++) {
@@ -8,33 +9,41 @@ for (var i = 0; i < 8; i++) {
 }
 
 function setUpBoard () {
-  for(var i = 0; i < 24; i++) {
-    var floorIndex = Math.floor(i/4);
+  var redCount = 1;
+  var blackCount = 1;
+  for(var i = 0; i < 64; i++) {
+    var floorIndex = Math.floor(i/8);
     if (floorIndex < 3) {
-      if (floorIndex % 2 == 0) {
-        occupiedArray[floorIndex][(i % 4) * 2 + 1] = createChecker(("red" + i), "red", ((floorIndex * 50) + 15) + "px", ((i % 4) * 100 + 65) + "px");
+      if ((floorIndex % 2 == 0) && (i % 2 == 1)) {
+        occupiedArray[floorIndex][i % 8] = createChecker(("red" + redCount), "red", ((floorIndex * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
+        redCount++;
+      }
+      else if ((floorIndex % 2 == 1) && (i % 2 == 0)){
+        occupiedArray[floorIndex][i % 8] = createChecker(("red" + redCount), "red", ((floorIndex * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
+        redCount++;
       }
       else {
-        occupiedArray[floorIndex][(i % 4) * 2] = createChecker(("red" + i), "red", ((floorIndex * 50) + 15) + "px", ((i % 4) * 100 + 15) + "px");
+        occupiedArray[floorIndex][i % 8] = null;
+      }
+    }
+    else if (floorIndex > 4) {
+      if ((floorIndex % 2 == 0) && (i % 2 == 1)) {
+        occupiedArray[floorIndex][i % 8] = createChecker(("black" + blackCount), "black", ((floorIndex * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
+        blackCount++;
+      }
+      else if ((floorIndex % 2 == 1) && (i % 2 == 0)){
+        occupiedArray[floorIndex][i % 8] = createChecker(("black" + blackCount), "black", ((floorIndex * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
+        blackCount++;
+      }
+      else {
+        occupiedArray[floorIndex][i % 8] = null;
       }
     }
     else {
-      if (floorIndex % 2 == 1) {
-          occupiedArray[floorIndex + 2][(i % 4) * 2] = createChecker(("black" + i), "black", ((floorIndex * 50) + 115) + "px", ((i % 4) * 100 + 15) + "px");
-      }
-      else {
-          occupiedArray[floorIndex + 2][(i % 4) * 2 + 1] = createChecker(("black" + i), "black", ((floorIndex * 50) + 115) + "px", ((i % 4) * 100 + 65) + "px");
-      }
+      occupiedArray[floorIndex][i % 8] = null;
     }
   }
-
-  for (var i = 0; i < 4; i++) {
-    occupiedArray[3][i * 2] = null;
-  }
-
-  for (var i = 0; i < 4; i++) {
-    occupiedArray[4][i * 2 + 1] = null;
-  }
+  console.log(occupiedArray);
 }
 
 window.onload = function() {
@@ -122,6 +131,10 @@ function kingAPiece(checkerId) {
 function isLegalMove(row, col, checkerId) {
   var floorRow = Math.floor((row - 15) / 50);
   var floorCol = Math.floor((col - 15) / 50);
+  var jumpList = jumpExists();
+  if ((currentId != null) && (checkerId != currentId)) {
+    return false;
+  }
   if (!((row % 2 == 0) && (col % 2 == 1)) && !(row % 2 == 1) && (col % 2 == 0)) {
     return false;
   }
@@ -132,14 +145,19 @@ function isLegalMove(row, col, checkerId) {
     return false;
   }
   if (((Math.abs(srcCol - col) == 2) && (Math.abs(srcRow - row) == 2))) {
-      console.log("row: " + (row + (srcRow - row)/2));
-      console.log("col: " + (col + (srcCol - col)/2));
     if (occupiedArray[row + (srcRow - row)/2][col + (srcCol - col)/2] == null) {
         return false;
     }
   }
   if (!document.getElementById(checkerId).classList.contains(currentColor)) {
     return false;
+  }
+  if (jumpList.length > 0) {
+    for (var i = 0; i < jumpList.length; i++) {
+      if (!jumpList.includes(checkerId)) {
+        return false;
+      }
+    }
   }
   if (!(isAKing(checkerId))) {
     if ((((srcRow - row) == -1) || ((srcRow - row) == -2)) && (document.getElementById(checkerId).classList.contains("red"))) {
@@ -167,6 +185,10 @@ function makeSimpleMove(destRow, destCol, checkerId) {
     currentColor = "red";
   }
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
+  var winner = checkForWinner();
+  if (winner != null) {
+    document.getElementById("currentPlayer").innerHTML = winner + " wins!";
+  }
 }
 
 function makeJumpMove(destRow, destCol, checkerId) {
@@ -177,7 +199,11 @@ function makeJumpMove(destRow, destCol, checkerId) {
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
   occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2] = null;
   occupiedArray[srcRow][srcCol] = null;
-  if (!checkAdjacent(destRow, destCol, checkerId)) {
+  if (currentId == null) {
+    currentId = checkerId;
+  }
+  var jumpList = jumpExists();
+  if (jumpList.length == 0) {
     if (document.getElementById(checkerId).classList.contains("red")) {
       currentColor = "black";
     }
@@ -185,56 +211,52 @@ function makeJumpMove(destRow, destCol, checkerId) {
       currentColor = "red";
     }
     document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
+    currentId = null;
+  }
+  var winner = checkForWinner();
+  if (winner != null) {
+    document.getElementById("currentPlayer").innerHTML = winner + " wins!";
   }
 }
 
 function checkAdjacent(row, col, checkerId) {
+  if ((currentId != null) && (checkerId != currentId)) {
+      return false;
+  }
   if (isAKing(checkerId)) {
-    if ((occupiedArray[row + 1][col + 1] != null) && (occupiedArray[row + 2][col + 2] == null)) {
+    if (((row + 1) <= 5) && ((col + 1) <= 5) && (occupiedArray[row + 1][col + 1] != null) && (occupiedArray[row + 2][col + 2] == null)) {
       var adjacentId = occupiedArray[row + 1][col + 1].id;
-      if ((row > 5) || (col > 5)) {
-        return false;
-      }
-      else if (document.getElementById(adjacentId).classList.contains("red") && (currentColor = "black")) {
+      if (document.getElementById(adjacentId).classList.contains("red") && (currentColor == "black")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor = "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor == "red")) {
         return true;
       }
     }
-    else if ((occupiedArray[row + 1][col - 1] != null) && (occupiedArray[row + 2][col - 2] == null)) {
+    else if (((row + 1) <= 5) && ((col - 1) >= 2) && (occupiedArray[row + 1][col - 1] != null) && (occupiedArray[row + 2][col - 2] == null)) {
       var adjacentId = occupiedArray[row + 1][col - 1].id;
-      if ((row > 5) || (col < 2)) {
-        return false;
-      }
-      else if (document.getElementById(adjacentId).classList.contains("red") && (currentColor = "black")) {
+      if (document.getElementById(adjacentId).classList.contains("red") && (currentColor == "black")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor = "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor == "red")) {
         return true;
       }
     }
-    else if ((occupiedArray[row - 1][col - 1] != null) && (occupiedArray[row - 2][col - 2] == null)) {
+    else if (((row - 1) >= 2) && ((col - 1) >= 2) && (occupiedArray[row - 1][col - 1] != null) && (occupiedArray[row - 2][col - 2] == null)) {
       var adjacentId = occupiedArray[row - 1][col - 1].id;
-      if ((row < 2) || (col < 2)) {
-        return false;
-      }
-      else if (document.getElementById(adjacentId).classList.contains("red") && (currentColor = "black")) {
+      if (document.getElementById(adjacentId).classList.contains("red") && (currentColor == "black")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor = "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor == "red")) {
         return true;
       }
     }
-    else if ((occupiedArray[row - 1][col + 1] != null) && (occupiedArray[row - 2][col + 2] == null)) {
+    else if (((row - 1) >= 2) && ((col + 1) <= 5) && (occupiedArray[row - 1][col + 1] != null) && (occupiedArray[row - 2][col + 2] == null)) {
       var adjacentId = occupiedArray[row - 1][col + 1].id;
-      if ((row < 2) || (col > 5)) {
-          return false;
-      }
-      else if (document.getElementById(adjacentId).classList.contains("red") && (currentColor = "black")) {
+      if (document.getElementById(adjacentId).classList.contains("red") && (currentColor == "black")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor = "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor == "red")) {
         return true;
       }
     }
@@ -274,6 +296,63 @@ function checkAdjacent(row, col, checkerId) {
     }
   }
   return false;
+}
+
+function jumpExists() {
+  var count = 0;
+  var jumpList = [];
+  for (var i = 0; i < occupiedArray.length; i++) {
+    for (var j = 0; j < occupiedArray[i].length; j++) {
+      if (occupiedArray[i][j] != null) {
+        if (checkAdjacent(i, j, occupiedArray[i][j].id) && (occupiedArray[i][j].classList.contains(currentColor))) {
+          if (currentId == null) {
+            jumpList.push(occupiedArray[i][j].id);
+          }
+          else if (currentId == occupiedArray[i][j].id) {
+            jumpList.push(occupiedArray[i][j].id);
+          }
+        }
+      }
+    }
+  }
+  return jumpList;
+}
+
+function checkForWinner() {
+  var redCount = 0;
+  var blackCount = 0;
+  for (var i = 0; i < occupiedArray.length; i++) {
+    for (var j = 0; j < occupiedArray[i].length; j++) {
+      if (occupiedArray[i][j] != null) {
+        if (occupiedArray[i][j].classList.contains("red")) {
+          redCount++;
+        }
+        else if (occupiedArray[i][j].classList.contains("black")) {
+          blackCount++;
+        }
+      }
+    }
+  }
+  if (redCount == 0) {
+    return "Black";
+  }
+  else if (blackCount == 0)
+  {
+    return "Red";
+  }
+  else {
+    return null;
+  }
+}
+
+function outOfBounds(row, col) {
+  if (((row - 2) < 0) || ((row + 2) > 7)) {
+    return false;
+  }
+  else if (((col - 2) < 0) || ((col + 2) > 7)) {
+    return false;
+  }
+  return true;
 }
 
 function isAKing(checkerId) {
