@@ -82,13 +82,13 @@ function drop(event) {
   var checkerId = event.dataTransfer.getData("Text");
   var destRow = Math.floor((event.clientY - 15) / 50);
   var destCol = Math.floor((event.clientX - 15) / 50);
-  if (isLegalMove(destRow, destCol, checkerId)) {
+  if (isLegalMove(destRow, destCol, checkerId, currentColor)) {
     event.preventDefault();
     if (Math.abs(destRow - srcRow) == 1) {
       makeSimpleMove(destRow, destCol, checkerId);
     }
     else if (Math.abs(destRow - srcRow) == 2) {
-      makeJumpMove(destRow, destCol, checkerId);
+      makeJumpMove(destRow, destCol, checkerId, currentColor);
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
       kingAPiece(checkerId);
@@ -128,17 +128,17 @@ function kingAPiece(checkerId) {
   }
 }
 
-function isLegalMove(row, col, checkerId) {
+function isLegalMove(row, col, checkerId, color) {
   var floorRow = Math.floor((row - 15) / 50);
   var floorCol = Math.floor((col - 15) / 50);
-  var jumpList = jumpExists();
+  var jumpList = jumpExists(color);
   if ((currentId != null) && (checkerId != currentId)) {
     return false;
   }
   if (!((row % 2 == 0) && (col % 2 == 1)) && !(row % 2 == 1) && (col % 2 == 0)) {
     return false;
   }
-  if (occupiedArray[row][col] != null) {
+  if (!cellIsVacant(row, col)) {
     return false;
   }
   if (!((Math.abs(srcCol - col) == 1) && (Math.abs(srcRow - row) == 1)) && !((Math.abs(srcCol - col) == 2) && (Math.abs(srcRow - row) == 2))) {
@@ -149,7 +149,8 @@ function isLegalMove(row, col, checkerId) {
         return false;
     }
   }
-  if (!document.getElementById(checkerId).classList.contains(currentColor)) {
+  // Check to see if the source checker being moved is the correct color
+  if (hasChecker(srcRow, srcCol, color) == null) {
     return false;
   }
   if (jumpList.length > 0) {
@@ -191,7 +192,7 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   }
 }
 
-function makeJumpMove(destRow, destCol, checkerId) {
+function makeJumpMove(destRow, destCol, checkerId, color) {
   document.getElementById(checkerId).style.top = (destRow * 50 + 15) + "px";
   document.getElementById(checkerId).style.left = (destCol * 50 + 15) + "px";
   var jumpedId = occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2].id;
@@ -202,7 +203,7 @@ function makeJumpMove(destRow, destCol, checkerId) {
   if (currentId == null) {
     currentId = checkerId;
   }
-  var jumpList = jumpExists();
+  var jumpList = jumpExists(color);
   if (jumpList.length == 0) {
     if (document.getElementById(checkerId).classList.contains("red")) {
       currentColor = "black";
@@ -219,59 +220,59 @@ function makeJumpMove(destRow, destCol, checkerId) {
   }
 }
 
-function checkAdjacent(row, col, checkerId) {
+function checkAdjacent(row, col, checkerId, color) {
   if ((currentId != null) && (checkerId != currentId)) {
-      return false;
+    return false;
+  }
+  if (outOfBounds(row, col)) {
+    return false;
   }
   if (isAKing(checkerId)) {
-    if (((row + 1) <= 5) && ((col + 1) <= 5) && (occupiedArray[row + 1][col + 1] != null) && (occupiedArray[row + 2][col + 2] == null)) {
+    if ((!cellIsVacant(row + 1, col + 1)) && (cellIsVacant(row + 2, col + 2))) {
       var adjacentId = occupiedArray[row + 1][col + 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red") && (currentColor == "black")) {
+      if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor == "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
         return true;
       }
     }
-    else if (((row + 1) <= 5) && ((col - 1) >= 2) && (occupiedArray[row + 1][col - 1] != null) && (occupiedArray[row + 2][col - 2] == null)) {
+    else if ((!cellIsVacant(row + 1, col - 1)) && (cellIsVacant(row + 2, col - 2))) {
       var adjacentId = occupiedArray[row + 1][col - 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red") && (currentColor == "black")) {
+      if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor == "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
         return true;
       }
     }
-    else if (((row - 1) >= 2) && ((col - 1) >= 2) && (occupiedArray[row - 1][col - 1] != null) && (occupiedArray[row - 2][col - 2] == null)) {
+    else if ((!cellIsVacant(row - 1, col - 1)) && (cellIsVacant(row - 2, col - 2))) {
       var adjacentId = occupiedArray[row - 1][col - 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red") && (currentColor == "black")) {
+      if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor == "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
         return true;
       }
     }
-    else if (((row - 1) >= 2) && ((col + 1) <= 5) && (occupiedArray[row - 1][col + 1] != null) && (occupiedArray[row - 2][col + 2] == null)) {
+    else if ((!cellIsVacant(row -1, col + 1)) && (cellIsVacant(row - 2, col + 2))) {
       var adjacentId = occupiedArray[row - 1][col + 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red") && (currentColor == "black")) {
+      if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (currentColor == "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
         return true;
       }
     }
   }
   else if (document.getElementById(checkerId).classList.contains("red")) {
-    if (row > 5) {
-      return false;
-    }
-    else if ((occupiedArray[row + 1][col - 1] != null) && (occupiedArray[row + 2][col - 2] == null) && (col >= 2)) {
+    if ((!cellIsVacant(row + 1, col - 1)) && (cellIsVacant(row + 2, col - 2))) {
       var adjacentId = occupiedArray[row + 1][col - 1].id;
       if (document.getElementById(adjacentId).classList.contains("black")) {
         return true;
       }
     }
-    else if ((occupiedArray[row + 1][col + 1] != null) && (occupiedArray[row + 2][col + 2] == null) && (col <= 5)) {
+    else if ((!cellIsVacant(row + 1, col + 1)) && (cellIsVacant(row + 2, col + 2))) {
       var adjacentId = occupiedArray[row + 1][col + 1].id;
       if (document.getElementById(adjacentId).classList.contains("black")) {
         return true;
@@ -279,16 +280,13 @@ function checkAdjacent(row, col, checkerId) {
     }
   }
   else if (document.getElementById(checkerId).classList.contains("black")) {
-    if (row < 2) {
-      return false;
-    }
-    else if ((occupiedArray[row - 1][col + 1] != null) && (occupiedArray[row - 2][col + 2] == null) && (col <= 5)) {
+    if ((!cellIsVacant(row - 1, col + 1)) && (cellIsVacant(row - 2, col + 2))) {
       var adjacentId = occupiedArray[row - 1][col + 1].id;
       if (document.getElementById(adjacentId).classList.contains("red")) {
         return true;
       }
     }
-    else if ((occupiedArray[row - 1][col - 1] != null) && (occupiedArray[row - 2][col - 2] == null) && (col >= 2)) {
+    else if ((!cellIsVacant(row - 1, col - 1)) && (cellIsVacant(row - 2, col - 2))) {
       var adjacentId = occupiedArray[row - 1][col - 1].id;
       if (document.getElementById(adjacentId).classList.contains("red")) {
         return true;
@@ -298,13 +296,13 @@ function checkAdjacent(row, col, checkerId) {
   return false;
 }
 
-function jumpExists() {
+function jumpExists(color) {
   var count = 0;
   var jumpList = [];
   for (var i = 0; i < occupiedArray.length; i++) {
     for (var j = 0; j < occupiedArray[i].length; j++) {
-      if (occupiedArray[i][j] != null) {
-        if (checkAdjacent(i, j, occupiedArray[i][j].id) && (occupiedArray[i][j].classList.contains(currentColor))) {
+      if (!cellIsVacant(i, j)) {
+        if (checkAdjacent(i, j, occupiedArray[i][j].id, color) && (occupiedArray[i][j].classList.contains(color))) {
           if (currentId == null) {
             jumpList.push(occupiedArray[i][j].id);
           }
@@ -323,7 +321,7 @@ function checkForWinner() {
   var blackCount = 0;
   for (var i = 0; i < occupiedArray.length; i++) {
     for (var j = 0; j < occupiedArray[i].length; j++) {
-      if (occupiedArray[i][j] != null) {
+      if (!cellIsVacant(i, j)) {
         if (occupiedArray[i][j].classList.contains("red")) {
           redCount++;
         }
@@ -343,6 +341,23 @@ function checkForWinner() {
   else {
     return null;
   }
+}
+
+function hasChecker(row, col, color) {
+  if ((row > 7) || (row < 0) || (col > 7) || (col < 0) || (occupiedArray[row][col] == null) || (!occupiedArray[row][col].classList.contains(color))) {
+    return null;
+  }
+  return occupiedArray[row][col];
+}
+
+function cellIsVacant(row, col) {
+  if (row > 7 || row < 0 || col > 7 || col < 0) {
+    return false;
+  }
+  else if (occupiedArray[row][col] == null) {
+    return true;
+  }
+  return false;
 }
 
 function outOfBounds(row, col) {
