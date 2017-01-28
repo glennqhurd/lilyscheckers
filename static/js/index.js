@@ -6,8 +6,8 @@ var currentCheckerId = null;
 var occupiedArray = new Array(8);
 
 function setUpBoard () {
-  var redCount = 1;
   var blackCount = 1;
+  var redCount = 1;
   for (var i = 0; i < 8; i++) {
     occupiedArray[i] = [];
   }
@@ -15,12 +15,12 @@ function setUpBoard () {
     var floorRow = Math.floor(i/8);
     if (floorRow < 3) {
       if ((floorRow % 2 == 0) && (i % 2 == 1)) {
-        occupiedArray[floorRow][i % 8] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
-        redCount++;
+        occupiedArray[floorRow][i % 8] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
+        blackCount++;
       }
       else if ((floorRow % 2 == 1) && (i % 2 == 0)){
-        occupiedArray[floorRow][i % 8] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
-        redCount++;
+        occupiedArray[floorRow][i % 8] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
+        blackCount++;
       }
       else {
         occupiedArray[floorRow][i % 8] = null;
@@ -28,12 +28,12 @@ function setUpBoard () {
     }
     else if (floorRow > 4) {
       if ((floorRow % 2 == 0) && (i % 2 == 1)) {
-        occupiedArray[floorRow][i % 8] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
-        blackCount++;
+        occupiedArray[floorRow][i % 8] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
+        redCount++;
       }
       else if ((floorRow % 2 == 1) && (i % 2 == 0)){
-        occupiedArray[floorRow][i % 8] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
-        blackCount++;
+        occupiedArray[floorRow][i % 8] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
+        redCount++;
       }
       else {
         occupiedArray[floorRow][i % 8] = null;
@@ -99,15 +99,15 @@ function drop(event) {
 function createChecker(id, color, tposition, lposition) {
   var image = document.createElement("IMG");
   image.id = id;
-  if (color == "black") {
-    image.src = "images/black_checker.png";
-    image.alt = "Black";
-    image.className = "black";
-  }
-  else if (color == "red"){
+  if (color == "red") {
     image.src = "images/red_checker.png";
     image.alt = "Red";
     image.className = "red";
+  }
+  else if (color == "black"){
+    image.src = "images/black_checker.png";
+    image.alt = "Black";
+    image.className = "black";
   }
   document.getElementById("boardset").appendChild(image);
   image.addEventListener("dragstart", drag);
@@ -119,10 +119,10 @@ function createChecker(id, color, tposition, lposition) {
 
 function kingAPiece(checkerId) {
   if (!document.getElementById(checkerId).classList.contains("king")) {
-    if (document.getElementById(checkerId).classList.contains("red")) {
-      document.getElementById(checkerId).src = "images/red_king.png";
-    } else {
+    if (document.getElementById(checkerId).classList.contains("black")) {
       document.getElementById(checkerId).src = "images/black_king.png";
+    } else {
+      document.getElementById(checkerId).src = "images/red_king.png";
     }
     document.getElementById(checkerId).classList.add("king");
   }
@@ -161,10 +161,10 @@ function isLegalMove(row, col, checkerId, color) {
     }
   }
   if (!(isAKing(checkerId))) {
-    if ((((srcRow - row) == -1) || ((srcRow - row) == -2)) && (document.getElementById(checkerId).classList.contains("red"))) {
+    if ((((srcRow - row) == -1) || ((srcRow - row) == -2)) && (document.getElementById(checkerId).classList.contains("black"))) {
       return true;
     }
-    else if ((((srcRow - row) == 1) || ((srcRow - row) == 2)) && (document.getElementById(checkerId).classList.contains("black"))) {
+    else if ((((srcRow - row) == 1) || ((srcRow - row) == 2)) && (document.getElementById(checkerId).classList.contains("red"))) {
       return true;
     }
     else {
@@ -190,7 +190,7 @@ function canMove(row, col) {
         return false;
       }
     }
-    else if (occupiedArray[row][col].classList.contains("red")) {
+    else if (occupiedArray[row][col].classList.contains("black")) {
       if (!cellIsVacant(row - 1, col - 1)) {
         return false;
       }
@@ -198,7 +198,7 @@ function canMove(row, col) {
         return false;
       }
     }
-    else if (occupiedArray[row][col].classList.contains("black")) {
+    else if (occupiedArray[row][col].classList.contains("red")) {
       if (!cellIsVacant(row + 1, col - 1)) {
         return false;
       }
@@ -226,7 +226,7 @@ function canJump(row, col) {
       return true;
     }
   }
-  else if (occupiedArray[row][col].classList.contains("black")) {
+  else if (occupiedArray[row][col].classList.contains("red")) {
     if (cellIsVacant(row - 2, col + 2) && (hasOppositeChecker(row - 1, col + 1, currentColor))) {
       return true;
     }
@@ -234,7 +234,7 @@ function canJump(row, col) {
       return true;
     }
   }
-  else if (occupiedArray[row][col].classList.contains("red")) {
+  else if (occupiedArray[row][col].classList.contains("black")) {
     if (cellIsVacant(row + 2, col + 2) && (hasOppositeChecker(row + 1, col + 1, currentColor))) {
       return true;
     }
@@ -249,11 +249,11 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   placeChecker(destRow, destCol, checkerId);
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
   occupiedArray[srcRow][srcCol] = null;
-  if (document.getElementById(checkerId).classList.contains("red")) {
-    currentColor = "black";
+  if (document.getElementById(checkerId).classList.contains("black")) {
+    currentColor = "red";
   }
   else {
-    currentColor = "red";
+    currentColor = "black";
   }
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
   var winner = checkForWinner();
@@ -274,11 +274,11 @@ function makeJumpMove(destRow, destCol, checkerId, color) {
   }
   var jumpList = jumpExists(color);
   if (jumpList.length == 0) {
-    if (document.getElementById(checkerId).classList.contains("red")) {
-      currentColor = "black";
+    if (document.getElementById(checkerId).classList.contains("black")) {
+      currentColor = "red";
     }
     else {
-      currentColor = "red";
+      currentColor = "black";
     }
     document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
     currentCheckerId = null;
@@ -296,65 +296,65 @@ function checkAdjacent(row, col, checkerId, color) {
   if (isAKing(checkerId)) {
     if (!outOfBounds(row + 2, col + 2) && (!cellIsVacant(row + 1, col + 1)) && (cellIsVacant(row + 2, col + 2))) {
       var adjacentId = occupiedArray[row + 1][col + 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
+      if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
         return true;
       }
     }
     if (!outOfBounds(row + 2, col - 2) && (!cellIsVacant(row + 1, col - 1)) && (cellIsVacant(row + 2, col - 2))) {
       var adjacentId = occupiedArray[row + 1][col - 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
+      if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
         return true;
       }
     }
     if (!outOfBounds(row - 2, col - 2) && (!cellIsVacant(row - 1, col - 1)) && (cellIsVacant(row - 2, col - 2))) {
       var adjacentId = occupiedArray[row - 1][col - 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
+      if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
+      else if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
         return true;
       }
     }
     if (!outOfBounds(row - 2, col + 2) && (!cellIsVacant(row - 1, col + 1)) && (cellIsVacant(row - 2, col + 2))) {
       var adjacentId = occupiedArray[row - 1][col + 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
+      if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
         return true;
       }
-      else if (document.getElementById(adjacentId).classList.contains("black") && (color == "red")) {
-        return true;
-      }
-    }
-  }
-  if (document.getElementById(checkerId).classList.contains("red")) {
-    if (!outOfBounds(row + 2, col - 2) && (!cellIsVacant(row + 1, col - 1)) && (cellIsVacant(row + 2, col - 2))) {
-      var adjacentId = occupiedArray[row + 1][col - 1].id;
-      if (document.getElementById(adjacentId).classList.contains("black")) {
-        return true;
-      }
-    }
-    if (!outOfBounds(row + 2, col + 2) && (!cellIsVacant(row + 1, col + 1)) && (cellIsVacant(row + 2, col + 2))) {
-      var adjacentId = occupiedArray[row + 1][col + 1].id;
-      if (document.getElementById(adjacentId).classList.contains("black")) {
+      else if (document.getElementById(adjacentId).classList.contains("red") && (color == "black")) {
         return true;
       }
     }
   }
   if (document.getElementById(checkerId).classList.contains("black")) {
+    if (!outOfBounds(row + 2, col - 2) && (!cellIsVacant(row + 1, col - 1)) && (cellIsVacant(row + 2, col - 2))) {
+      var adjacentId = occupiedArray[row + 1][col - 1].id;
+      if (document.getElementById(adjacentId).classList.contains("red")) {
+        return true;
+      }
+    }
+    if (!outOfBounds(row + 2, col + 2) && (!cellIsVacant(row + 1, col + 1)) && (cellIsVacant(row + 2, col + 2))) {
+      var adjacentId = occupiedArray[row + 1][col + 1].id;
+      if (document.getElementById(adjacentId).classList.contains("red")) {
+        return true;
+      }
+    }
+  }
+  if (document.getElementById(checkerId).classList.contains("red")) {
     if (!outOfBounds(row - 2, col + 2) && (!cellIsVacant(row - 1, col + 1)) && (cellIsVacant(row - 2, col + 2))) {
       var adjacentId = occupiedArray[row - 1][col + 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red")) {
+      if (document.getElementById(adjacentId).classList.contains("black")) {
         return true;
       }
     }
     if (!outOfBounds(row - 2, col - 2) && (!cellIsVacant(row - 1, col - 1)) && (cellIsVacant(row - 2, col - 2))) {
       var adjacentId = occupiedArray[row - 1][col - 1].id;
-      if (document.getElementById(adjacentId).classList.contains("red")) {
+      if (document.getElementById(adjacentId).classList.contains("black")) {
         return true;
       }
     }
@@ -382,26 +382,26 @@ function jumpExists(color) {
 }
 
 function checkForWinner() {
-  var redCount = 0;
   var blackCount = 0;
+  var redCount = 0;
   for (var i = 0; i < occupiedArray.length; i++) {
     for (var j = 0; j < occupiedArray[i].length; j++) {
       if (!cellIsVacant(i, j)) {
-        if (occupiedArray[i][j].classList.contains("red")) {
-          redCount++;
-        }
-        else if (occupiedArray[i][j].classList.contains("black")) {
+        if (occupiedArray[i][j].classList.contains("black")) {
           blackCount++;
+        }
+        else if (occupiedArray[i][j].classList.contains("red")) {
+          redCount++;
         }
       }
     }
   }
-  if (redCount == 0) {
-    return "Black";
-  }
-  else if (blackCount == 0)
-  {
+  if (blackCount == 0) {
     return "Red";
+  }
+  else if (redCount == 0)
+  {
+    return "Black";
   }
   else {
     return null;
