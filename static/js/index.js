@@ -1,6 +1,6 @@
 var srcCol = 0;
 var srcRow = 0;
-var currentColor = "red";
+var currentColor = "black";
 var currentCheckerId = null;
 // occupiedArray stores an 8x8 array that represents each board and whether or not it has a checker piece, each index is based off of Math.floor((y - 15) / 50) and Math.floor((x - 15) / 50)
 var occupiedArray = new Array(8);
@@ -100,12 +100,12 @@ function createChecker(id, color, tposition, lposition) {
   var image = document.createElement("IMG");
   image.id = id;
   if (color == "black") {
-    image.src = "images/red_checker.png";
+    image.src = "images/black_checker.png";
     image.alt = "Black";
     image.className = "black";
   }
   else if (color == "red"){
-    image.src = "images/black_checker.png";
+    image.src = "images/red_checker.png";
     image.alt = "Red";
     image.className = "red";
   }
@@ -131,7 +131,7 @@ function kingAPiece(checkerId) {
 function isLegalMove(row, col, checkerId, color) {
   var jumpList = jumpExists(color);
   // Check to see if the source checker being moved is the correct color
-  if (hasChecker(srcRow, srcCol, color) == null) {
+  if (hasOppositeChecker(srcRow, srcCol, color)) {
     return false;
   }
   // If there was a previous jump this turn and another jump is available only
@@ -175,7 +175,7 @@ function isLegalMove(row, col, checkerId, color) {
 }
 
 function canMove(row, col) {
-  if (hasChecker(row, col, currentColor)) {
+  if (!hasOppositeChecker(row, col, currentColor)) {
     if (isAKing(occupiedArray[row][col].id)) {
       if (!cellIsVacant(row + 1, col + 1)) {
         return false;
@@ -212,36 +212,37 @@ function canMove(row, col) {
 
 function canJump(row, col) {
   // true if cell is occupied, if a king check if in one of four directions the next checker is the opposite color and the next cell after that is empty...
-  if (isAKing(occupiedArray[row][col].id))
-    if (!cellIsVacant(row + 2, col + 2) || cellIsVacant(row + 1, col + 1)) {
-      return false;
+  if (isAKing(occupiedArray[row][col].id)) {
+    if (cellIsVacant(row + 2, col + 2) && (hasOppositeChecker(row + 1, col + 1, currentColor))) {
+      return true;
     }
-    if (!cellIsVacant(row + 2, col - 2) || cellIsVacant(row + 1, col - 1)) {
-      return false;
+    if (cellIsVacant(row + 2, col - 2) && (hasOppositeChecker(row + 1, col - 1, currentColor))) {
+      return true;
     }
-    if (!cellIsVacant(row - 2, col + 2) || cellIsVacant(row - 1, col + 1)) {
-      return false;
+    if (cellIsVacant(row - 2, col + 2) && (hasOppositeChecker(row - 1, col + 1, currentColor))) {
+      return true;
     }
-    if (!cellIsVacant(row - 2, col - 2) || cellIsVacant(row - 1, col - 1)) {
-      return false;
-    }
-  else if (occupiedArray[row][col].classList.contains("red")) {
-    if (!cellIsVacant(row - 2, col + 2) || cellIsVacant(row - 1, col + 1)) {
-      return false;
-    }
-    if (!cellIsVacant(row - 2, col - 2) || cellIsVacant(row - 1, col - 1)) {
-      return false;
+    if (cellIsVacant(row - 2, col - 2) && (hasOppositeChecker(row - 1, col - 1, currentColor))) {
+      return true;
     }
   }
   else if (occupiedArray[row][col].classList.contains("black")) {
-    if (!cellIsVacant(row + 2, col + 2) || cellIsVacant(row + 1, col + 1)) {
-      return false;
+    if (cellIsVacant(row - 2, col + 2) && (hasOppositeChecker(row - 1, col + 1, currentColor))) {
+      return true;
     }
-    if (!cellIsVacant(row + 2, col - 2) || cellIsVacant(row + 1, col - 1)) {
-      return false;
+    if (cellIsVacant(row - 2, col - 2) && (hasOppositeChecker(row - 1, col - 1, currentColor))) {
+      return true;
     }
   }
-  return true;
+  else if (occupiedArray[row][col].classList.contains("red")) {
+    if (cellIsVacant(row + 2, col + 2) && (hasOppositeChecker(row + 1, col + 1, currentColor))) {
+      return true;
+    }
+    if (cellIsVacant(row + 2, col - 2) && (hasOppositeChecker(row + 1, col - 1, currentColor))) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function makeSimpleMove(destRow, destCol, checkerId) {
@@ -407,11 +408,11 @@ function checkForWinner() {
   }
 }
 
-function hasChecker(row, col, color) {
-  if ((row > 7) || (row < 0) || (col > 7) || (col < 0) || (occupiedArray[row][col] == null) || (!occupiedArray[row][col].classList.contains(color))) {
-    return null;
+function hasOppositeChecker(row, col, color) {
+  if ((row > 7) || (row < 0) || (col > 7) || (col < 0) || (occupiedArray[row][col] == null) || (occupiedArray[row][col].classList.contains(color))) {
+    return false;
   }
-  return occupiedArray[row][col];
+  return true;
 }
 
 function cellIsVacant(row, col) {
