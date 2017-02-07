@@ -35,9 +35,9 @@ function populateCheckersArray() {
 }
 
 function setUpBoard () {
-  var blackCount = 1;
-  var redCount = 1;
   var checkerIndex = 0;
+  currentColor = "black";
+  document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
   for (var i = 0; i < 8; i++) {
     occupiedArray[i] = [];
   }
@@ -46,17 +46,15 @@ function setUpBoard () {
     var floorCol = Math.floor((i % 8)/2);
     if (floorRow < 3) {
       if ((floorRow % 2 == 0) && (i % 2 == 1)) {
-        //checkerArray[checkerIndex] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
         placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 50);
         occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
-        blackCount++;
+        checkerArray[checkerIndex].style.display = "initial";
         checkerIndex++;
       }
       else if ((floorRow % 2 == 1) && (i % 2 == 0)){
-        //checkerArray[checkerIndex] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
         placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 0);
         occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
-        blackCount++;
+        checkerArray[checkerIndex].style.display = "initial";
         checkerIndex++;
       }
       else {
@@ -65,17 +63,15 @@ function setUpBoard () {
     }
     else if (floorRow > 4) {
       if ((floorRow % 2 == 0) && (i % 2 == 1)) {
-        //checkerArray[checkerIndex] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
         placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 50);
         occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
-        redCount++;
+        checkerArray[checkerIndex].style.display = "initial";
         checkerIndex++;
       }
       else if ((floorRow % 2 == 1) && (i % 2 == 0)){
-        //checkerArray[checkerIndex] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
         placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 0);
         occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
-        redCount++;
+        checkerArray[checkerIndex].style.display = "initial";
         checkerIndex++;
       }
       else {
@@ -85,6 +81,9 @@ function setUpBoard () {
     else {
       occupiedArray[floorRow][i % 8] = null;
     }
+  }
+  for(var i = checkerIndex; i < 48; i++) {
+    checkerArray[i].style.display = "none";
   }
   console.log(occupiedArray);
   console.log(checkerArray);
@@ -182,7 +181,7 @@ function drop(event) {
       makeJumpMove(destRow, destCol, checkerId, currentColor);
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
-      kingAPiece(checkerId);
+      kingAPiece(destRow, destCol, checkerId);
     }
   }
 }
@@ -218,13 +217,13 @@ function createChecker(id, color) {
   return image;
 }
 
-function kingAPiece(checkerId) {
+function kingAPiece(row, col, checkerId) {
   if (!document.getElementById(checkerId).classList.contains("king")) {
-    if (document.getElementById(checkerId).classList.contains("black")) {
-      document.getElementById(checkerId).src = "images/black_king.png";
-    } else {
-      document.getElementById(checkerId).src = "images/red_king.png";
-    }
+    var index = findCheckerIndex(checkerId);
+    document.getElementById(checkerId).style.display = "none";
+    occupiedArray[row][col] = checkerArray[index + 24];
+    occupiedArray[row][col].style.display = "initial";
+    placeChecker(row, col, occupiedArray[row][col].id);
     document.getElementById(checkerId).classList.add("king");
   }
 }
@@ -548,7 +547,16 @@ function placeInitialChecker(row, col, checkerId, offset) {
   document.getElementById(checkerId).style.left = (col * 100 + 15 + offset) + "px";
 }
 
-function placeChecker(row, col, checkerId, offset) {
+function placeChecker(row, col, checkerId) {
   document.getElementById(checkerId).style.top = (row * 50 + 15) + "px";
   document.getElementById(checkerId).style.left = (col * 50 + 15) + "px";
+}
+
+function findCheckerIndex(checkerId) {
+    for(var i = 0; i < checkerArray.length; i++) {
+        if(checkerArray[i].id === checkerId) {
+            return i;
+        }
+    }
+    return -1;
 }
