@@ -4,23 +4,60 @@ var currentColor = "black";
 var currentCheckerId = null;
 // occupiedArray stores an 8x8 array that represents each board and whether or not it has a checker piece, each index is based off of Math.floor((y - 15) / 50) and Math.floor((x - 15) / 50)
 var occupiedArray = new Array(8);
+var checkerArray = new Array(48);
+document.getElementById("resetButton").onclick = setUpBoard;
+
+function populateCheckersArray() {
+  var blackCount = 1;
+  var redCount = 1;
+  var blackKingCount = 1;
+  var redKingCount = 1;
+  for(var i = 0; i < checkerArray.length; i++) {
+    if (i < 12) {
+      checkerArray[i] = createChecker(("black" + blackCount), "black");
+      blackCount++;
+    }
+    else if (i < 24) {
+      checkerArray[i] = createChecker(("red" + redCount), "red");
+      redCount++;
+    }
+    else if (i < 36) {
+      checkerArray[i] = createChecker(("bking" + blackKingCount), "bking");
+      blackKingCount++;
+      checkerArray[i].style.display = "none";
+    }
+    else {
+      checkerArray[i] = createChecker(("rking" + redKingCount), "rking");
+      redKingCount++;
+      checkerArray[i].style.display = "none";
+    }
+  }
+}
 
 function setUpBoard () {
   var blackCount = 1;
   var redCount = 1;
+  var checkerIndex = 0;
   for (var i = 0; i < 8; i++) {
     occupiedArray[i] = [];
   }
   for(var i = 0; i < 64; i++) {
     var floorRow = Math.floor(i/8);
+    var floorCol = Math.floor((i % 8)/2);
     if (floorRow < 3) {
       if ((floorRow % 2 == 0) && (i % 2 == 1)) {
-        occupiedArray[floorRow][i % 8] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
+        //checkerArray[checkerIndex] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
+        placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 50);
+        occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
         blackCount++;
+        checkerIndex++;
       }
       else if ((floorRow % 2 == 1) && (i % 2 == 0)){
-        occupiedArray[floorRow][i % 8] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
+        //checkerArray[checkerIndex] = createChecker(("black" + blackCount), "black", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
+        placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 0);
+        occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
         blackCount++;
+        checkerIndex++;
       }
       else {
         occupiedArray[floorRow][i % 8] = null;
@@ -28,12 +65,18 @@ function setUpBoard () {
     }
     else if (floorRow > 4) {
       if ((floorRow % 2 == 0) && (i % 2 == 1)) {
-        occupiedArray[floorRow][i % 8] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
+        //checkerArray[checkerIndex] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 65) + "px");
+        placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 50);
+        occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
         redCount++;
+        checkerIndex++;
       }
       else if ((floorRow % 2 == 1) && (i % 2 == 0)){
-        occupiedArray[floorRow][i % 8] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
+        //checkerArray[checkerIndex] = createChecker(("red" + redCount), "red", ((floorRow * 50) + 15) + "px", (Math.floor((i % 8)/2) * 100 + 15) + "px");
+        placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 0);
+        occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
         redCount++;
+        checkerIndex++;
       }
       else {
         occupiedArray[floorRow][i % 8] = null;
@@ -44,6 +87,52 @@ function setUpBoard () {
     }
   }
   console.log(occupiedArray);
+  console.log(checkerArray);
+}
+
+function getBoard() {
+  var boardString = "";
+  for(var i = 0; i < 64; i++) {
+    var floorRow = Math.floor(i/8);
+    if (((floorRow % 2 == 0) && (i % 2 == 1)) || ((floorRow % 2 == 1) && (i % 2 == 0))) {
+      if (occupiedArray[floorRow][i % 8] == null) {
+          boardString += "-";
+      }
+      else if (occupiedArray[floorRow][i % 8].classList.contains("red")) {
+        if (occupiedArray[floorRow][i % 8].classList.contains("king")) {
+          boardString += "R";
+        }
+        else {
+          boardString += "r";
+        }
+      }
+      else {
+        if (occupiedArray[floorRow][i % 8].classList.contains("king")) {
+          boardString += "B";
+        }
+        else {
+          boardString += "b";
+        }
+      }
+    }
+  }
+  console.log(boardString);
+  return boardString;
+}
+
+function loadBoard(boardString) {
+  for (var i = 0; i < boardString.length; i++) {
+    var floorRow = Math.floor(i/4);
+    if (floorRow % 2 == 0) {
+      loadChecker(floorRow, (i%4)*2 + 1, boardString.charAt(i));
+    }
+  }
+}
+
+function loadChecker(row, col, checkerString, index) {
+  if (checkerString == "r") {
+    return createChecker("red" + index, "red", ((floorRow * 50) + 15) + "px", ((col * 50)));
+  }
 }
 
 window.onload = function() {
@@ -64,7 +153,9 @@ window.onload = function() {
 	  context2D.fillRect(x, y, 50, 50);
     }
   }
+  populateCheckersArray();
   setUpBoard();
+  var temp = getBoard();
 };
 
 function allowDrop(event) {
@@ -96,7 +187,7 @@ function drop(event) {
   }
 }
 
-function createChecker(id, color, tposition, lposition) {
+function createChecker(id, color) {
   var image = document.createElement("IMG");
   image.id = id;
   if (color == "red") {
@@ -109,11 +200,21 @@ function createChecker(id, color, tposition, lposition) {
     image.alt = "Black";
     image.className = "black";
   }
+  else if (color == "rking") {
+    image.src = "images/red_king.png";
+    image.alt = "RedKing";
+    image.classList.add("red");
+    image.classList.add("king");
+  }
+  else if (color == "bking") {
+    image.src = "images/black_king.png";
+    image.alt = "BlackKing";
+    image.classList.add("black");
+    image.classList.add("king");
+  }
   document.getElementById("boardset").appendChild(image);
   image.addEventListener("dragstart", drag);
   image.style.position = "absolute";
-  image.style.top = tposition;
-  image.style.left = lposition;
   return image;
 }
 
@@ -149,8 +250,11 @@ function isLegalMove(row, col, checkerId, color) {
     return false;
   }
   if (canJump(srcRow, srcCol)) {
+    if (Math.abs(srcRow - row) == 1) {
+      return false;
+    }
     if (occupiedArray[row + (srcRow - row)/2][col + (srcCol - col)/2] == null) {
-        return false;
+      return false;
     }
   }
   if (jumpList.length > 0) {
@@ -246,7 +350,7 @@ function canJump(row, col) {
 }
 
 function makeSimpleMove(destRow, destCol, checkerId) {
-  placeChecker(destRow, destCol, checkerId);
+  placeChecker(destRow, destCol, checkerId, 0);
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
   occupiedArray[srcRow][srcCol] = null;
   if (document.getElementById(checkerId).classList.contains("black")) {
@@ -263,7 +367,7 @@ function makeSimpleMove(destRow, destCol, checkerId) {
 }
 
 function makeJumpMove(destRow, destCol, checkerId, color) {
-  placeChecker(destRow, destCol, checkerId);
+  placeChecker(destRow, destCol, checkerId, 0);
   var jumpedId = occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2].id;
   document.getElementById(jumpedId).style.display = "none";
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
@@ -439,7 +543,12 @@ function isAKing(checkerId) {
   return document.getElementById(checkerId).classList.contains("king");
 }
 
-function placeChecker(row, col, checkerId) {
+function placeInitialChecker(row, col, checkerId, offset) {
+  document.getElementById(checkerId).style.top = (row * 50 + 15) + "px";
+  document.getElementById(checkerId).style.left = (col * 100 + 15 + offset) + "px";
+}
+
+function placeChecker(row, col, checkerId, offset) {
   document.getElementById(checkerId).style.top = (row * 50 + 15) + "px";
   document.getElementById(checkerId).style.left = (col * 50 + 15) + "px";
 }
