@@ -8,7 +8,8 @@ for (var i = 0; i < 8; i++) {
   occupiedArray[i] = [];
 }
 var checkerArray = new Array(48);
-document.getElementById("resetButton").onclick = setUpBoard;
+document.getElementById("setButton").onclick = setUpBoard;
+document.getElementById("resetButton").onclick = resetBoard;
 
 function populateCheckersArray() {
   var blackCount = 1;
@@ -37,7 +38,7 @@ function populateCheckersArray() {
   }
 }
 
-function setUpBoard () {
+function setUpBoard() {
   var checkerIndex = 0;
   currentColor = "black";
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
@@ -48,6 +49,18 @@ function setUpBoard () {
   loadBoard(boardString);
   console.log(occupiedArray);
   console.log(checkerArray);
+}
+
+function resetBoard() {
+  var checkerIndex = 0;
+  currentColor = "black";
+  document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
+  for(var i = checkerIndex; i < 48; i++) {
+    checkerArray[i].style.display = "none";
+  }
+  var boardString = "bbbbbbbbbbbb--------rrrrrrrrrrrr";
+  document.getElementById("boardInput").value = boardString;
+  loadBoard(boardString);
 }
 
 function getBoard() {
@@ -142,6 +155,26 @@ function hideAll() {
   }
 }
 
+function getComputersMove() {
+  var stateString = document.getElementById("boardInput").value;
+  if (stateString) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var move = JSON.parse(this.responseText);
+        drawX(boardNodes[move.board], move.column, move.row);
+        if (move.winning) {
+          document.getElementById("newGame").classList.add("active");
+        } else {
+          document.getElementById("newGame").classList.remove("active");
+        }
+      }
+    };
+    xhttp.open("GET", "move/" + stateString, true);
+    xhttp.send();
+  }
+}
+
 window.onload = function() {
   var canvas = document.getElementById("checkerboard");
   var context2D = canvas.getContext("2d");
@@ -195,6 +228,7 @@ function drop(event) {
     if (winner != null) {
       document.getElementById("currentPlayer").innerHTML = winner + " wins!";
     }
+    document.getElementById("boardInput").value = getBoard();
   }
 }
 
@@ -292,32 +326,17 @@ function isLegalMove(row, col, checkerId, color) {
 function canMove(row, col) {
   if (!hasOppositeChecker(row, col, currentColor)) {
     if (isAKing(occupiedArray[row][col].id)) {
-      if (!cellIsVacant(row + 1, col + 1)) {
-        return false;
-      }
-      if (!cellIsVacant(row + 1, col - 1)) {
-        return false;
-      }
-      if (!cellIsVacant(row - 1, col + 1)) {
-        return false;
-      }
-      if (!cellIsVacant(row - 1, col - 1)) {
+      if (!cellIsVacant(row + 1, col + 1) && !cellIsVacant(row + 1, col - 1) && !cellIsVacant(row - 1, col + 1) && !cellIsVacant(row - 1, col - 1)) {
         return false;
       }
     }
     else if (occupiedArray[row][col].classList.contains("black")) {
-      if (!cellIsVacant(row - 1, col - 1)) {
-        return false;
-      }
-      if (!cellIsVacant(row - 1, col + 1)) {
+      if (!cellIsVacant(row - 1, col - 1) && !cellIsVacant(row - 1, col + 1)) {
         return false;
       }
     }
     else if (occupiedArray[row][col].classList.contains("red")) {
-      if (!cellIsVacant(row + 1, col - 1)) {
-        return false;
-      }
-      if (!cellIsVacant(row + 1, col + 1)) {
+      if (!cellIsVacant(row + 1, col - 1) && !cellIsVacant(row + 1, col + 1)) {
         return false;
       }
     }

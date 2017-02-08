@@ -27,8 +27,9 @@
         <p id="currentPlayer">
             Current player: black
         </p>
-        <input id="resetButton" type="button" value="Reset Game"/>
-        <input id="boardInput" type="text" value="bbbbbbbbbbbb--------rrrrrrrrrrrr"/>
+        <input id="resetButton" type="button" value="Restart Game"/>
+        <input id="setButton" type="button" value="Set Board"/>
+        <input id="boardInput" type="text" value="bbbbbbbbbbbb--------rrrrrrrrrrrr" width=32/>
         <p>
             Instructions: To play click and drag a piece on the board to another empty space.  You can only move in a diagonal line from the square of origin.
             Jumps are forced so if there is at least 1 jump available you can choose among those available but cannot move any other piece.
@@ -51,6 +52,12 @@
         </p>
         <p>
             Update (1/17/2017): Implemented forced jumping.
+        </p>
+        <p>
+            Update (2/8/2017): Many changes made including using a preset collection of checkers instead of creating new ones each time game is started.
+            Also added reset game button and a button that sets the board position based on the string you put into the text box.  r/b stand for regular checkers, R/B stand for kings,
+            and - stands for empty space.  Since the board is being set up with existing checkers you can't use a string that has more than 12 of any one type of checker.  Also, movement
+            is still the same for each checker based on color so if you set up the board with reverse colors you'll be stuck.
         </p>
     </div>
 	</body>
