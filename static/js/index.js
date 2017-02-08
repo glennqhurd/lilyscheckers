@@ -4,6 +4,9 @@ var currentColor = "black";
 var currentCheckerId = null;
 // occupiedArray stores an 8x8 array that represents each board and whether or not it has a checker piece, each index is based off of Math.floor((y - 15) / 50) and Math.floor((x - 15) / 50)
 var occupiedArray = new Array(8);
+for (var i = 0; i < 8; i++) {
+  occupiedArray[i] = [];
+}
 var checkerArray = new Array(48);
 document.getElementById("resetButton").onclick = setUpBoard;
 
@@ -38,53 +41,11 @@ function setUpBoard () {
   var checkerIndex = 0;
   currentColor = "black";
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
-  for (var i = 0; i < 8; i++) {
-    occupiedArray[i] = [];
-  }
-  for(var i = 0; i < 64; i++) {
-    var floorRow = Math.floor(i/8);
-    var floorCol = Math.floor((i % 8)/2);
-    if (floorRow < 3) {
-      if ((floorRow % 2 == 0) && (i % 2 == 1)) {
-        placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 50);
-        occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
-        checkerArray[checkerIndex].style.display = "initial";
-        checkerIndex++;
-      }
-      else if ((floorRow % 2 == 1) && (i % 2 == 0)){
-        placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 0);
-        occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
-        checkerArray[checkerIndex].style.display = "initial";
-        checkerIndex++;
-      }
-      else {
-        occupiedArray[floorRow][i % 8] = null;
-      }
-    }
-    else if (floorRow > 4) {
-      if ((floorRow % 2 == 0) && (i % 2 == 1)) {
-        placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 50);
-        occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
-        checkerArray[checkerIndex].style.display = "initial";
-        checkerIndex++;
-      }
-      else if ((floorRow % 2 == 1) && (i % 2 == 0)){
-        placeInitialChecker(floorRow, floorCol, checkerArray[checkerIndex].id, 0);
-        occupiedArray[floorRow][i % 8] = checkerArray[checkerIndex];
-        checkerArray[checkerIndex].style.display = "initial";
-        checkerIndex++;
-      }
-      else {
-        occupiedArray[floorRow][i % 8] = null;
-      }
-    }
-    else {
-      occupiedArray[floorRow][i % 8] = null;
-    }
-  }
   for(var i = checkerIndex; i < 48; i++) {
     checkerArray[i].style.display = "none";
   }
+  var boardString = document.getElementById("boardInput").value;
+  loadBoard(boardString);
   console.log(occupiedArray);
   console.log(checkerArray);
 }
@@ -120,17 +81,64 @@ function getBoard() {
 }
 
 function loadBoard(boardString) {
+  if (boardString.length != 32) {
+    return false;
+  }
   for (var i = 0; i < boardString.length; i++) {
-    var floorRow = Math.floor(i/4);
-    if (floorRow % 2 == 0) {
-      loadChecker(floorRow, (i%4)*2 + 1, boardString.charAt(i));
+    if ((boardString.charAt(i) != "b") && (boardString.charAt(i) != "r") && (boardString.charAt(i) != "B") && (boardString.charAt(i) != "R") && (boardString.charAt(i) != "-")) {
+      return false;
     }
   }
+  var blackCount = 1;
+  var redCount = 1;
+  var blackKingCount = 1;
+  var redKingCount = 1;
+  hideAll();
+  for (var i = 0; i < 8; i++) {
+    for (var j = 0; j < 8; j++) {
+      occupiedArray[i][j] = null;
+    }
+  }
+  for (var i = 0; i < boardString.length; i++) {
+    var floorRow = Math.floor(i/4);
+    var floorCol = (i % 4);
+
+    if (boardString.charAt(i) == "b") {
+      var checkerId = "black" + blackCount;
+      blackCount++;
+    }
+    else if (boardString.charAt(i) == "r") {
+      var checkerId = "red" + redCount;
+      redCount++;
+    }
+    else if (boardString.charAt(i) == "B") {
+      var checkerId = "bking" + blackKingCount;
+      blackKingCount++;
+    }
+    else if (boardString.charAt(i) == "R") {
+      var checkerId = "rking" + redKingCount;
+      redKingCount++;
+    }
+    else {
+      var checkerId = null;
+    }
+    if ((floorRow % 2 == 0) && (checkerId != null)) {
+      occupiedArray[floorRow][floorCol * 2 + 1] = document.getElementById(checkerId);
+      placeInitialChecker(floorRow, floorCol, checkerId, 50);
+      document.getElementById(checkerId).style.display = "initial";
+    }
+    else if ((floorRow % 2 == 1) && (checkerId != null)) {
+      occupiedArray[floorRow][floorCol * 2] = document.getElementById(checkerId);
+      placeInitialChecker(floorRow, floorCol, checkerId, 0);
+      document.getElementById(checkerId).style.display = "initial";
+    }
+  }
+  return true;
 }
 
-function loadChecker(row, col, checkerString, index) {
-  if (checkerString == "r") {
-    return createChecker("red" + index, "red", ((floorRow * 50) + 15) + "px", ((col * 50)));
+function hideAll() {
+  for (i = 0; i < checkerArray.length; i++) {
+    checkerArray[i].style.display = "none";
   }
 }
 
@@ -182,6 +190,10 @@ function drop(event) {
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
       kingAPiece(destRow, destCol, checkerId);
+    }
+    var winner = checkForWinner();
+    if (winner != null) {
+      document.getElementById("currentPlayer").innerHTML = winner + " wins!";
     }
   }
 }
@@ -359,10 +371,6 @@ function makeSimpleMove(destRow, destCol, checkerId) {
     currentColor = "black";
   }
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
-  var winner = checkForWinner();
-  if (winner != null) {
-    document.getElementById("currentPlayer").innerHTML = winner + " wins!";
-  }
 }
 
 function makeJumpMove(destRow, destCol, checkerId, color) {
@@ -385,10 +393,6 @@ function makeJumpMove(destRow, destCol, checkerId, color) {
     }
     document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
     currentCheckerId = null;
-  }
-  var winner = checkForWinner();
-  if (winner != null) {
-    document.getElementById("currentPlayer").innerHTML = winner + " wins!";
   }
 }
 
@@ -553,10 +557,10 @@ function placeChecker(row, col, checkerId) {
 }
 
 function findCheckerIndex(checkerId) {
-    for(var i = 0; i < checkerArray.length; i++) {
-        if(checkerArray[i].id === checkerId) {
-            return i;
-        }
+  for(var i = 0; i < checkerArray.length; i++) {
+    if(checkerArray[i].id === checkerId) {
+      return i;
     }
-    return -1;
+  }
+  return -1;
 }
