@@ -10,6 +10,24 @@ for (var i = 0; i < 8; i++) {
 var checkerArray = new Array(48);
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
+document.getElementById("colorButton").onclick = changePlayer;
+document.getElementById("promptButton").onclick = getComputersMove;
+
+function getComputersMove() {
+  var boardString = document.getElementById("boardInput").value;
+  if (boardString) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        console.log("entered if");
+        document.getElementById("boardInput").value = this.responseText;
+        setUpBoard();
+      }
+    };
+    xhttp.open("GET", "http://www.hurd-sullivan.com/checkers/" + currentColor + "/" + boardString, true);
+    xhttp.send();
+  }
+}
 
 function populateCheckersArray() {
   var blackCount = 1;
@@ -38,9 +56,19 @@ function populateCheckersArray() {
   }
 }
 
+function changePlayer() {
+  color = document.getElementById("colorTextbox").value;
+  if (color == "red" || color == "black") {
+    currentColor = color;
+    document.getElementById("currentPlayer").innerHTML = "Current player: " + color;
+  }
+  else {
+    alert("Color must be either red or black.");
+  }
+}
+
 function setUpBoard() {
   var checkerIndex = 0;
-  currentColor = "black";
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
   for(var i = checkerIndex; i < 48; i++) {
     checkerArray[i].style.display = "none";
@@ -152,26 +180,6 @@ function loadBoard(boardString) {
 function hideAll() {
   for (i = 0; i < checkerArray.length; i++) {
     checkerArray[i].style.display = "none";
-  }
-}
-
-function getComputersMove() {
-  var stateString = document.getElementById("boardInput").value;
-  if (stateString) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        var move = JSON.parse(this.responseText);
-        drawX(boardNodes[move.board], move.column, move.row);
-        if (move.winning) {
-          document.getElementById("newGame").classList.add("active");
-        } else {
-          document.getElementById("newGame").classList.remove("active");
-        }
-      }
-    };
-    xhttp.open("GET", "move/" + stateString, true);
-    xhttp.send();
   }
 }
 

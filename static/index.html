@@ -27,9 +27,17 @@
         <p id="currentPlayer">
             Current player: black
         </p>
+        <input id="colorButton" type="button" value="Set current player (black/red)"/>
+        <input id="colorTextbox" type="text" value="black"/>
+        <input id="promptButton" type="button" value="Prompt Computer Move"/>
+    </div>
+    <div>
+        <p></p>
         <input id="resetButton" type="button" value="Restart Game"/>
         <input id="setButton" type="button" value="Set Board"/>
         <input id="boardInput" type="text" value="bbbbbbbbbbbb--------rrrrrrrrrrrr" width=32/>
+    </div>
+    <div>
         <p>
             Instructions: To play click and drag a piece on the board to another empty space.  You can only move in a diagonal line from the square of origin.
             Jumps are forced so if there is at least 1 jump available you can choose among those available but cannot move any other piece.
