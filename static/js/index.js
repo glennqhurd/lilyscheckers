@@ -24,7 +24,7 @@ function getComputersMove() {
         setUpBoard();
       }
     };
-    xhttp.open("GET", "http://www.hurd-sullivan.com/checkers/" + currentColor + "/" + boardString, true);
+    xhttp.open("GET", "checkers/" + currentColor + "/" + boardString, true);
     xhttp.send();
   }
 }
