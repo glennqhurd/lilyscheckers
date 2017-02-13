@@ -18,14 +18,23 @@ function getComputersMove() {
   if (boardString) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
+      document.getElementById("promptButton").disabled = true;
       if (this.readyState == 4 && this.status == 200) {
         console.log("entered if");
         document.getElementById("boardInput").value = this.responseText;
         setUpBoard();
+        document.getElementById("promptButton").disabled = false;
+        document.getElementById("colorTextbox").value = currentColor;
       }
     };
     xhttp.open("GET", "checkers/" + currentColor + "/" + boardString, true);
     xhttp.send();
+    if (currentColor == "red") {
+      currentColor = "black";
+    }
+    else {
+      currentColor = "red";
+    }
   }
 }
 
@@ -75,6 +84,7 @@ function setUpBoard() {
   }
   var boardString = document.getElementById("boardInput").value;
   loadBoard(boardString);
+  checkForWinner();
   console.log(occupiedArray);
   console.log(checkerArray);
 }
@@ -232,10 +242,7 @@ function drop(event) {
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
       kingAPiece(destRow, destCol, checkerId);
     }
-    var winner = checkForWinner();
-    if (winner != null) {
-      document.getElementById("currentPlayer").innerHTML = winner + " wins!";
-    }
+    checkForWinner();
     document.getElementById("boardInput").value = getBoard();
   }
 }
@@ -531,14 +538,11 @@ function checkForWinner() {
     }
   }
   if (blackCount == 0) {
-    return "Red";
+    document.getElementById("currentPlayer").innerHTML = "Red wins!";
   }
   else if (redCount == 0)
   {
-    return "Black";
-  }
-  else {
-    return null;
+    document.getElementById("currentPlayer").innerHTML = "Black wins!";
   }
 }
 
