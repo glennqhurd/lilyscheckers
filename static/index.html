@@ -18,6 +18,9 @@
 	</head>
 
 	<body>
+	<div>
+	  <h1>Lily's Checkers</h1>
+	</div>
     <div id="boardset">
       <canvas width=400 height=400 id="checkerboard" ondrop="drop(event)" ondragover="allowDrop(event)" z-axis=-20>
        Your browser does not support the HTML5
@@ -27,9 +30,17 @@
         <p id="currentPlayer">
             Current player: black
         </p>
+        <p id="isThinking">
+            Computer is idle.
+        </p>
         <input id="colorButton" type="button" value="Set current player (black/red)"/>
         <input id="colorTextbox" type="text" value="black"/>
-        <input id="promptButton" type="button" value="Prompt Computer Move"/>
+        <input id="promptButton" type="button" value="Start/Continue AI move"/>
+    </div>
+    <div>
+        <p></p>
+        <input id="redCBox" type="checkbox" value="redCBox"> <label for="redCBox">Red computer player</label>
+        <input id="blackCBox" type="checkbox" value="blackCBox"> <label for="blackCBox">Black computer player</label>
     </div>
     <div>
         <p></p>

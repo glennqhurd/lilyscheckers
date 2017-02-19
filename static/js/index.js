@@ -2,7 +2,7 @@ var srcCol = 0;
 var srcRow = 0;
 var currentColor = "black";
 var currentCheckerId = null;
-// occupiedArray stores an 8x8 array that represents each board and whether or not it has a checker piece, each index is based off of Math.floor((y - 15) / 50) and Math.floor((x - 15) / 50)
+// occupiedArray stores an 8x8 array that represents each board and whether or not it has a checker piece, each index is based off of Math.floor((y - 7) / 50) and Math.floor((x - 7) / 50)
 var occupiedArray = new Array(8);
 for (var i = 0; i < 8; i++) {
   occupiedArray[i] = [];
@@ -12,29 +12,46 @@ document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("colorButton").onclick = changePlayer;
 document.getElementById("promptButton").onclick = getComputersMove;
+var bodyRect = document.body.getBoundingClientRect(),
+  elemRect = document.getElementById("checkerboard").getBoundingClientRect(),
+  offset   = elemRect.top - bodyRect.top;
+//document.getElementById("checkerboard").ondrop = drop(event);
+//document.getElementById("checkerboard").ondragover=allowDrop(event);
 
 function getComputersMove() {
   var boardString = document.getElementById("boardInput").value;
-  if (boardString) {
+  if (boardString && !checkForWinner()) {
     var xhttp = new XMLHttpRequest();
+    document.getElementById("isThinking").innerHTML = "Computer is thinking.";
     xhttp.onreadystatechange = function() {
       document.getElementById("promptButton").disabled = true;
       if (this.readyState == 4 && this.status == 200) {
         console.log("entered if");
         document.getElementById("boardInput").value = this.responseText;
+        document.getElementById("colorTextbox").value = currentColor;
         setUpBoard();
         document.getElementById("promptButton").disabled = false;
-        document.getElementById("colorTextbox").value = currentColor;
+        if (currentColor == "red") {
+          currentColor = "black";
+        }
+        else {
+          currentColor = "red";
+        }
+        document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
+        if ((currentColor == "black") && (document.getElementById("blackCBox").checked == true)) {
+          getComputersMove();
+        }
+        else if ((currentColor == "red") && (document.getElementById("redCBox").checked == true)) {
+          getComputersMove();
+        }
+        else {
+          document.getElementById("isThinking").innerHTML = "Computer is idle.";
+        }
       }
     };
     xhttp.open("GET", "checkers/" + currentColor + "/" + boardString, true);
+    //xhttp.open("GET", "http://www.hurd-sullivan.com/checkers/black/" + boardString, true);
     xhttp.send();
-    if (currentColor == "red") {
-      currentColor = "black";
-    }
-    else {
-      currentColor = "red";
-    }
   }
 }
 
@@ -84,7 +101,7 @@ function setUpBoard() {
   }
   var boardString = document.getElementById("boardInput").value;
   loadBoard(boardString);
-  checkForWinner();
+  var winner = checkForWinner();
   console.log(occupiedArray);
   console.log(checkerArray);
 }
@@ -222,15 +239,15 @@ function allowDrop(event) {
 
 function drag(event) {
   event.dataTransfer.setData("Text", event.target.id);
-  srcCol = Math.floor((event.clientX - 15) / 50);
-  srcRow = Math.floor((event.clientY - 15) / 50);
+  srcCol = Math.floor((event.clientX - 7 - 8) / 50);
+  srcRow = Math.floor((event.clientY - 7 - 80) / 50);
   var checkerObject = document.getElementById(event.target.id);
 }
 
 function drop(event) {
   var checkerId = event.dataTransfer.getData("Text");
-  var destRow = Math.floor((event.clientY - 15) / 50);
-  var destCol = Math.floor((event.clientX - 15) / 50);
+  var destRow = Math.floor((event.clientY - 7 - 80) / 50);
+  var destCol = Math.floor((event.clientX - 7 - 8) / 50);
   if (isLegalMove(destRow, destCol, checkerId, currentColor)) {
     event.preventDefault();
     if (Math.abs(destRow - srcRow) == 1) {
@@ -242,8 +259,11 @@ function drop(event) {
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
       kingAPiece(destRow, destCol, checkerId);
     }
-    checkForWinner();
+    var winner = checkForWinner();
     document.getElementById("boardInput").value = getBoard();
+    if (findIfChecked()) {
+      getComputersMove();
+    }
   }
 }
 
@@ -253,24 +273,22 @@ function createChecker(id, color) {
   if (color == "red") {
     image.src = "images/red_checker.png";
     image.alt = "Red";
-    image.className = "red";
+    image.classList.add("red", "checker");
   }
   else if (color == "black"){
     image.src = "images/black_checker.png";
     image.alt = "Black";
-    image.className = "black";
+    image.classList.add("black", "checker");
   }
   else if (color == "rking") {
     image.src = "images/red_king.png";
     image.alt = "RedKing";
-    image.classList.add("red");
-    image.classList.add("king");
+    image.classList.add("red", "king", "checker");
   }
   else if (color == "bking") {
     image.src = "images/black_king.png";
     image.alt = "BlackKing";
-    image.classList.add("black");
-    image.classList.add("king");
+    image.classList.add("black", "king", "checker");
   }
   document.getElementById("boardset").appendChild(image);
   image.addEventListener("dragstart", drag);
@@ -539,11 +557,14 @@ function checkForWinner() {
   }
   if (blackCount == 0) {
     document.getElementById("currentPlayer").innerHTML = "Red wins!";
+    return true;
   }
   else if (redCount == 0)
   {
     document.getElementById("currentPlayer").innerHTML = "Black wins!";
+    return true;
   }
+  return false;
 }
 
 function hasOppositeChecker(row, col, color) {
@@ -577,14 +598,14 @@ function isAKing(checkerId) {
   return document.getElementById(checkerId).classList.contains("king");
 }
 
-function placeInitialChecker(row, col, checkerId, offset) {
-  document.getElementById(checkerId).style.top = (row * 50 + 15) + "px";
-  document.getElementById(checkerId).style.left = (col * 100 + 15 + offset) + "px";
+function placeInitialChecker(row, col, checkerId, boardOffset) {
+  document.getElementById(checkerId).style.top = (row * 50) + 7 + "px";
+  document.getElementById(checkerId).style.left = (col * 100 + 7 + boardOffset) + "px";
 }
 
 function placeChecker(row, col, checkerId) {
-  document.getElementById(checkerId).style.top = (row * 50 + 15) + "px";
-  document.getElementById(checkerId).style.left = (col * 50 + 15) + "px";
+  document.getElementById(checkerId).style.top = (row * 50 + 7) + "px";
+  document.getElementById(checkerId).style.left = (col * 50 + 7) + "px";
 }
 
 function findCheckerIndex(checkerId) {
@@ -594,4 +615,14 @@ function findCheckerIndex(checkerId) {
     }
   }
   return -1;
+}
+
+function findIfChecked() {
+  if ((currentColor == "black") && (document.getElementById("blackCBox").checked == true)) {
+    return true;
+  }
+  else if ((currentColor == "red") && (document.getElementById("redCBox").checked == true)) {
+    return true;
+  }
+  return false;
 }

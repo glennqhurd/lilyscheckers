@@ -1,4 +1,20 @@
 #checkerboard {
-	border: 2px solid black;
+  border: 2px solid black;
   z-axis: -20;
+}
+
+#boardset {
+  position: relative;
+}
+
+canvas {
+  position: relative;
+}
+
+.checker {
+  position: absolute;
+}
+
+#boardset {
+  position: relative;
 }
