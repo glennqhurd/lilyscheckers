@@ -336,10 +336,8 @@ function isLegalMove(row, col, checkerId, color) {
     }
   }
   if (jumpList.length > 0) {
-    for (var i = 0; i < jumpList.length; i++) {
-      if (!jumpList.includes(checkerId)) {
-        return false;
-      }
+    if (!jumpList.includes(checkerId)) {
+      return false;
     }
   }
   if (!(isAKing(checkerId))) {
