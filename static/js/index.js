@@ -8,17 +8,36 @@ for (var i = 0; i < 8; i++) {
   occupiedArray[i] = [];
 }
 var checkerArray = new Array(48);
-// clickMoves stores the possible moves that can be made after the user has clicked a checker
-var clickMoves = [];
+var clickedCheckerId = null;
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("colorButton").onclick = changePlayer;
 document.getElementById("promptButton").onclick = getComputersMove;
+document.getElementById("checkerboard").onclick = boardClick;
 var bodyRect = document.body.getBoundingClientRect(),
   elemRect = document.getElementById("checkerboard").getBoundingClientRect(),
   offset   = elemRect.top - bodyRect.top;
 //document.getElementById("checkerboard").ondrop = drop;
 //document.getElementById("checkerboard").ondragover=allowDrop;
+
+function clearSpaces() {
+  var canvas = document.getElementById("checkerboard");
+  var context2D = canvas.getContext("2d");
+
+  for (var boardRow = 0; boardRow < 8; boardRow++) {
+    for (var boardCol = 0; boardCol < 8; boardCol++) {
+      // coordinates of the top-left corner
+	  var x = boardCol * 50;
+	  var y = boardRow * 50;
+      if ((boardRow + boardCol) % 2 == 1) {
+	    context2D.fillStyle = "SeaGreen";
+	    context2D.fillRect(x, y, 50, 50);
+	  }
+    }
+  }
+
+  context2D.fillStyle = "Gray";
+}
 
 function getComputersMove() {
   var boardString = document.getElementById("boardInput").value;
@@ -257,6 +276,8 @@ function drag(event) {
 }
 
 function drop(event) {
+  clickMoves = [];
+  clearSpaces();
   var checkerId = event.dataTransfer.getData("Text");
   var destRow = Math.floor((event.clientY - 7 - 80) / 50);
   var destCol = Math.floor((event.clientX - 7 - 8) / 50);
@@ -277,11 +298,13 @@ function drop(event) {
       getComputersMove();
     }
   }
+
+  clickedCheckerId = null;
 }
 
 function checkerClick(event) {
   clickMoves = [];
-  var checkerId = event.target.id;
+  clickedCheckerId = event.target.id;
   srcCol = Math.floor((event.clientX - 7 - 8) / 50);
   srcRow = Math.floor((event.clientY - 7 - 80) / 50);
 
@@ -302,48 +325,57 @@ function checkerClick(event) {
 
   context2D.fillStyle = "Gray";
 
-  if(isLegalMove(srcRow - 1, srcCol - 1, checkerId, currentColor)) {
-    clickMoves.push([srcRow - 1, srcCol - 1, checkerId]);
+  if(isLegalMove(srcRow - 1, srcCol - 1, clickedCheckerId, currentColor)) {
     context2D.fillRect((srcCol - 1) * 50, (srcRow - 1) * 50, 50, 50);
   }
-  else if(isLegalMove(srcRow - 2, srcCol - 2, checkerId, currentColor)) {
-    clickMoves.push([srcRow - 2, srcCol - 2, checkerId]);
+  else if(isLegalMove(srcRow - 2, srcCol - 2, clickedCheckerId, currentColor)) {
     context2D.fillRect((srcCol - 2) * 50, (srcRow - 2) * 50, 50, 50);
   }
-  if(isLegalMove(srcRow - 1, srcCol + 1, checkerId, currentColor)) {
-    clickMoves.push([srcRow - 1, srcCol + 1, checkerId]);
+  if(isLegalMove(srcRow - 1, srcCol + 1, clickedCheckerId, currentColor)) {
     context2D.fillRect((srcCol + 1) * 50, (srcRow - 1) * 50, 50, 50);
   }
-  else if(isLegalMove(srcRow - 2, srcCol + 2, checkerId, currentColor)) {
-    clickMoves.push([srcRow - 2, srcCol + 2, checkerId]);
+  else if(isLegalMove(srcRow - 2, srcCol + 2, clickedCheckerId, currentColor)) {
     context2D.fillRect((srcCol + 2) * 50, (srcRow - 2) * 50, 50, 50);
   }
-  if(isLegalMove(srcRow + 1, srcCol - 1, checkerId, currentColor)) {
-    clickMoves.push([srcRow + 1, srcCol - 1, checkerId]);
+  if(isLegalMove(srcRow + 1, srcCol - 1, clickedCheckerId, currentColor)) {
     context2D.fillRect((srcCol - 1) * 50, (srcRow + 1) * 50, 50, 50);
   }
-  else if(isLegalMove(srcRow + 2, srcCol - 2, checkerId, currentColor)) {
-    clickMoves.push([srcRow + 2, srcCol - 2, checkerId]);
+  else if(isLegalMove(srcRow + 2, srcCol - 2, clickedCheckerId, currentColor)) {
     context2D.fillRect((srcCol - 2) * 50, (srcRow + 2) * 50, 50, 50);
   }
-  if(isLegalMove(srcRow + 1, srcCol + 1, checkerId, currentColor)) {
-    clickMoves.push([srcRow + 1, srcCol + 1, checkerId]);
+  if(isLegalMove(srcRow + 1, srcCol + 1, clickedCheckerId, currentColor)) {
     context2D.fillRect((srcCol + 1) * 50, (srcRow + 1) * 50, 50, 50);
   }
-  else if(isLegalMove(srcRow + 2, srcCol + 2, checkerId, currentColor)) {
-    clickMoves.push([srcRow + 2, srcCol + 2, checkerId]);
+  else if(isLegalMove(srcRow + 2, srcCol + 2, clickedCheckerId, currentColor)) {
     context2D.fillRect((srcCol + 2) * 50, (srcRow + 2) * 50, 50, 50);
   }
 }
 
 function boardClick(event) {
-  for(var i = 0; i < clickMoves.length; i++) {
-    var x = Math.floor((event.clientX - 7 - 8) / 50);
-    var y = Math.floor((event.clientY - 7 - 80) / 50);
-    if((y == clickMoves[i][0]) && (x == clickMoves[i][1])) {
+  clickMoves = [];
+  clearSpaces();
 
+  var destCol = Math.floor((event.clientX - 7 - 8) / 50);
+  var destRow = Math.floor((event.clientY - 7 - 80) / 50);
+  if ((clickedCheckerId != null) && isLegalMove(destRow, destCol, clickedCheckerId, currentColor)) {
+    event.preventDefault();
+    if (Math.abs(destRow - srcRow) == 1) {
+      makeSimpleMove(destRow, destCol, clickedCheckerId);
+    }
+    else if (Math.abs(destRow - srcRow) == 2) {
+      makeJumpMove(destRow, destCol, clickedCheckerId, currentColor);
+    }
+    if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
+      kingAPiece(destRow, destCol, clickedCheckerId);
+    }
+    var winner = checkForWinner();
+    document.getElementById("boardInput").value = getBoard();
+    if (findIfChecked()) {
+      getComputersMove();
     }
   }
+
+  clickedCheckerId = null;
 }
 
 function createChecker(id, color) {
