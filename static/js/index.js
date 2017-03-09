@@ -8,6 +8,8 @@ for (var i = 0; i < 8; i++) {
   occupiedArray[i] = [];
 }
 var checkerArray = new Array(48);
+// clickMoves stores the possible moves that can be made after the user has clicked a checker
+var clickMoves = [];
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("colorButton").onclick = changePlayer;
@@ -15,8 +17,8 @@ document.getElementById("promptButton").onclick = getComputersMove;
 var bodyRect = document.body.getBoundingClientRect(),
   elemRect = document.getElementById("checkerboard").getBoundingClientRect(),
   offset   = elemRect.top - bodyRect.top;
-//document.getElementById("checkerboard").ondrop = drop(event);
-//document.getElementById("checkerboard").ondragover=allowDrop(event);
+//document.getElementById("checkerboard").ondrop = drop;
+//document.getElementById("checkerboard").ondragover=allowDrop;
 
 function getComputersMove() {
   var boardString = document.getElementById("boardInput").value;
@@ -36,6 +38,13 @@ function getComputersMove() {
         }
         else {
           currentColor = "red";
+        }
+        clearJumpClasses();
+        if(jumpExists(currentColor).length > 0) {
+          document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
+        }
+        else {
+          document.getElementById("forcedJump").innerHTML = "No forced jumps.";
         }
         document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
         if ((currentColor == "black") && (document.getElementById("blackCBox").checked == true)) {
@@ -79,6 +88,7 @@ function populateCheckersArray() {
       redKingCount++;
       checkerArray[i].style.display = "none";
     }
+    checkerArray[i].onclick = checkerClick;
   }
 }
 
@@ -116,6 +126,8 @@ function resetBoard() {
   var boardString = "bbbbbbbbbbbb--------rrrrrrrrrrrr";
   document.getElementById("boardInput").value = boardString;
   loadBoard(boardString);
+  document.getElementById("blackCBox").checked == false;
+  document.getElementById("redCBox").checked == false;
 }
 
 function getBoard() {
@@ -241,7 +253,7 @@ function drag(event) {
   event.dataTransfer.setData("Text", event.target.id);
   srcCol = Math.floor((event.clientX - 7 - 8) / 50);
   srcRow = Math.floor((event.clientY - 7 - 80) / 50);
-  var checkerObject = document.getElementById(event.target.id);
+  //var checkerObject = document.getElementById(event.target.id);
 }
 
 function drop(event) {
@@ -263,6 +275,73 @@ function drop(event) {
     document.getElementById("boardInput").value = getBoard();
     if (findIfChecked()) {
       getComputersMove();
+    }
+  }
+}
+
+function checkerClick(event) {
+  clickMoves = [];
+  var checkerId = event.target.id;
+  srcCol = Math.floor((event.clientX - 7 - 8) / 50);
+  srcRow = Math.floor((event.clientY - 7 - 80) / 50);
+
+  var canvas = document.getElementById("checkerboard");
+  var context2D = canvas.getContext("2d");
+
+  for (var boardRow = 0; boardRow < 8; boardRow++) {
+    for (var boardCol = 0; boardCol < 8; boardCol++) {
+      // coordinates of the top-left corner
+	  var x = boardCol * 50;
+	  var y = boardRow * 50;
+      if ((boardRow + boardCol) % 2 == 1) {
+	    context2D.fillStyle = "SeaGreen";
+	    context2D.fillRect(x, y, 50, 50);
+	  }
+    }
+  }
+
+  context2D.fillStyle = "Gray";
+
+  if(isLegalMove(srcRow - 1, srcCol - 1, checkerId, currentColor)) {
+    clickMoves.push([srcRow - 1, srcCol - 1, checkerId]);
+    context2D.fillRect((srcCol - 1) * 50, (srcRow - 1) * 50, 50, 50);
+  }
+  else if(isLegalMove(srcRow - 2, srcCol - 2, checkerId, currentColor)) {
+    clickMoves.push([srcRow - 2, srcCol - 2, checkerId]);
+    context2D.fillRect((srcCol - 2) * 50, (srcRow - 2) * 50, 50, 50);
+  }
+  if(isLegalMove(srcRow - 1, srcCol + 1, checkerId, currentColor)) {
+    clickMoves.push([srcRow - 1, srcCol + 1, checkerId]);
+    context2D.fillRect((srcCol + 1) * 50, (srcRow - 1) * 50, 50, 50);
+  }
+  else if(isLegalMove(srcRow - 2, srcCol + 2, checkerId, currentColor)) {
+    clickMoves.push([srcRow - 2, srcCol + 2, checkerId]);
+    context2D.fillRect((srcCol + 2) * 50, (srcRow - 2) * 50, 50, 50);
+  }
+  if(isLegalMove(srcRow + 1, srcCol - 1, checkerId, currentColor)) {
+    clickMoves.push([srcRow + 1, srcCol - 1, checkerId]);
+    context2D.fillRect((srcCol - 1) * 50, (srcRow + 1) * 50, 50, 50);
+  }
+  else if(isLegalMove(srcRow + 2, srcCol - 2, checkerId, currentColor)) {
+    clickMoves.push([srcRow + 2, srcCol - 2, checkerId]);
+    context2D.fillRect((srcCol - 2) * 50, (srcRow + 2) * 50, 50, 50);
+  }
+  if(isLegalMove(srcRow + 1, srcCol + 1, checkerId, currentColor)) {
+    clickMoves.push([srcRow + 1, srcCol + 1, checkerId]);
+    context2D.fillRect((srcCol + 1) * 50, (srcRow + 1) * 50, 50, 50);
+  }
+  else if(isLegalMove(srcRow + 2, srcCol + 2, checkerId, currentColor)) {
+    clickMoves.push([srcRow + 2, srcCol + 2, checkerId]);
+    context2D.fillRect((srcCol + 2) * 50, (srcRow + 2) * 50, 50, 50);
+  }
+}
+
+function boardClick(event) {
+  for(var i = 0; i < clickMoves.length; i++) {
+    var x = Math.floor((event.clientX - 7 - 8) / 50);
+    var y = Math.floor((event.clientY - 7 - 80) / 50);
+    if((y == clickMoves[i][0]) && (x == clickMoves[i][1])) {
+
     }
   }
 }
@@ -303,7 +382,6 @@ function kingAPiece(row, col, checkerId) {
     occupiedArray[row][col] = checkerArray[index + 24];
     occupiedArray[row][col].style.display = "initial";
     placeChecker(row, col, occupiedArray[row][col].id);
-    document.getElementById(checkerId).classList.add("king");
   }
 }
 
@@ -311,6 +389,10 @@ function isLegalMove(row, col, checkerId, color) {
   var jumpList = jumpExists(color);
   // Check to see if the source checker being moved is the correct color
   if (hasOppositeChecker(srcRow, srcCol, color)) {
+    return false;
+  }
+  // Check to see if there's currently a winner already (For use in the click event)
+  if (checkForWinner()) {
     return false;
   }
   // If there was a previous jump this turn and another jump is available only
@@ -421,6 +503,12 @@ function makeSimpleMove(destRow, destCol, checkerId) {
     currentColor = "black";
   }
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
+  if(jumpExists(currentColor).length > 0) {
+    document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
+  }
+  else {
+    document.getElementById("forcedJump").innerHTML = "No forced jumps.";
+  }
 }
 
 function makeJumpMove(destRow, destCol, checkerId, color) {
@@ -443,6 +531,13 @@ function makeJumpMove(destRow, destCol, checkerId, color) {
     }
     document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
     currentCheckerId = null;
+    clearJumpClasses();
+  }
+  if(jumpExists(currentColor).length > 0) {
+    document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
+  }
+  else {
+    document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   }
 }
 
@@ -527,9 +622,11 @@ function jumpExists(color) {
         if (checkAdjacent(i, j, occupiedArray[i][j].id, color) && (occupiedArray[i][j].classList.contains(color))) {
           if (currentCheckerId == null) {
             jumpList.push(occupiedArray[i][j].id);
+            occupiedArray[i][j].classList.add("jumpAvailable");
           }
           else if (currentCheckerId == occupiedArray[i][j].id) {
             jumpList.push(occupiedArray[i][j].id);
+            occupiedArray[i][j].classList.add("jumpAvailable");
           }
         }
       }
@@ -623,4 +720,12 @@ function findIfChecked() {
     return true;
   }
   return false;
+}
+
+function clearJumpClasses() {
+  for(var i = 0; i < checkerArray.length; i++) {
+    if(checkerArray[i].classList.contains("jumpAvailable")) {
+      checkerArray[i].classList.remove("jumpAvailable");
+    }
+  }
 }

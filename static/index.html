@@ -30,23 +30,26 @@
         <p id="currentPlayer">
             Current player: black
         </p>
+        <p id="forcedJump">
+            No forced jumps.
+        </p>
         <p id="isThinking">
             Computer is idle.
         </p>
         <input id="colorButton" type="button" value="Set current player (black/red)"/>
         <input id="colorTextbox" type="text" value="black"/>
-        <input id="promptButton" type="button" value="Start/Continue AI move"/>
-    </div>
-    <div>
-        <p></p>
-        <input id="redCBox" type="checkbox" value="redCBox"> <label for="redCBox">Red computer player</label>
-        <input id="blackCBox" type="checkbox" value="blackCBox"> <label for="blackCBox">Black computer player</label>
     </div>
     <div>
         <p></p>
         <input id="resetButton" type="button" value="Restart Game"/>
         <input id="setButton" type="button" value="Set Board"/>
         <input id="boardInput" type="text" value="bbbbbbbbbbbb--------rrrrrrrrrrrr" width=32/>
+    </div>
+    <div>
+        <p></p>
+        <input id="promptButton" type="button" value="Start/Continue AI move"/>
+        <input id="redCBox" type="checkbox" value="redCBox"> <label for="redCBox">Red computer player</label>
+        <input id="blackCBox" type="checkbox" value="blackCBox"> <label for="blackCBox">Black computer player</label>
     </div>
     <div>
         <p>
@@ -57,42 +60,6 @@
             Advanced Instructions: If you want to play with at least one computer player then you must mark either one or both of the checkboxes for whichever computer you want to use.
             Make sure to wait for the computer to finish their move, the label "Computer is idle." will swap to "Computer is thinking." when the computer is active.  If you want to start the game
             with the computer as black then you have to press the "Start/Continue AI move" button once.  Then the computer will automatically make a move when it's their turn.
-        </p>
-        <p>
-            Stage one is done, you can now play Checkers in a game with somebody else on the same computer.  Other features include forced jumps and turns.
-        </p>
-        <p>
-            Stage two is done, you can play against a computer or use two computers against each other.
-        </p>
-        <p>
-            Update (1/04/2017): Checkers can now become kings when reaching the other end of the board
-            and can then move backwards and forwards freely as well as jump opponent's pieces.
-        </p>
-        <p>
-            Update (1/10/2017): Broke the king process then fixed it by rearranging code.
-        </p>
-        <p>
-            Update (1/14/2017): Taking a step backwards to reduce inefficient code to be more clear and concise.
-        </p>
-        <p>
-            Update (1/16/2017): Pieces are moving correctly both single space and jumping.  Jumping also hides a piece on the board so other pieces can capture each other.
-        </p>
-        <p>
-            Update (1/17/2017): Implemented forced jumping.
-        </p>
-        <p>
-            Update (2/8/2017): Many changes made including using a preset collection of checkers instead of creating new ones each time game is started.
-            Also added reset game button and a button that sets the board position based on the string you put into the text box.  r/b stand for regular checkers, R/B stand for kings,
-            and - stands for empty space.  Since the board is being set up with existing checkers you can't use a string that has more than 12 of any one type of checker.  Also, movement
-            is still the same for each checker based on color so if you set up the board with reverse colors you'll be stuck.
-        </p>
-        <p>
-            Update (2/11/2017): Computer AI is now implemented.  Push the button and wait for the computer to move after a delay then move your piece or if you want you can hit the button again
-            for a computer versus computer game.  Emphasis on waiting for the computer's move, it will bug out right now if you move or press the button before the computer finishes their move.
-        </p>
-        <p>
-            Update (2/20/2017): Computer AI is improved, now moves automatically if the appropriate checkbox is used for the computer color.  Also grayed out the button to make it inactive in case
-            use tries to press computer prompt button too soon.
         </p>
     </div>
 	</body>
