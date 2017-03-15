@@ -6,6 +6,14 @@ div {
     width: 500px;
 }
 
+#gameStatus {
+  border: 2px solid black;
+}
+
+#instructions {
+  border: 2px solid black;
+}
+
 #checkerboard {
   border: 2px solid black;
   z-axis: -20;

@@ -83,7 +83,7 @@ function getComputersMove() {
   var boardString = document.getElementById("boardInput").value;
   if (boardString && !checkForWinner()) {
     var xhttp = new XMLHttpRequest();
-    document.getElementById("isThinking").innerHTML = "Computer is thinking.";
+    document.getElementById("forcedJump").innerHTML = "Computer's turn.";
     xhttp.onreadystatechange = function() {
       document.getElementById("promptButton").disabled = true;
       if (this.readyState == 4 && this.status == 200) {
@@ -99,12 +99,7 @@ function getComputersMove() {
           currentColor = "red";
         }
         clearJumpClasses();
-        if(jumpExists(currentColor).length > 0) {
-          document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
-        }
-        else {
-          document.getElementById("forcedJump").innerHTML = "No forced jumps.";
-        }
+
         document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
         if ((currentColor == "black") && (document.getElementById("blackCBox").checked == true)) {
           getComputersMove();
@@ -113,7 +108,12 @@ function getComputersMove() {
           getComputersMove();
         }
         else {
-          document.getElementById("isThinking").innerHTML = "Computer is idle.";
+          if(jumpExists(currentColor).length > 0) {
+            document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
+          }
+          else {
+            document.getElementById("forcedJump").innerHTML = "No forced jumps.";
+          }
         }
       }
     };
@@ -329,6 +329,13 @@ function drag(event) {
   srcCol = Math.floor((event.clientX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
   srcRow = Math.floor((event.clientY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
 
+  if(canMove(srcRow, srcCol)) {
+    document.getElementById(checkerId).setAttribute("draggable", true);
+  }
+  else {
+    document.getElementById(checkerId).setAttribute("draggable", false);
+  }
+
   highlightSpaces(event.target.id);
 }
 
@@ -442,41 +449,30 @@ function isLegalMove(row, col, checkerId, color) {
   }
   // If there was a previous jump this turn and another jump is available only
   // the jumping piece can continue moving
-  if (!((row % 2 == 0) && (col % 2 == 1)) && !(row % 2 == 1) && (col % 2 == 0)) {
-    return false;
-  }
-  if (!cellIsVacant(row, col)) {
-    return false;
-  }
-  if ((currentCheckerId != null) && (checkerId != currentCheckerId)) {
-    return false;
-  }
-  if (!((Math.abs(srcCol - col) == 1) && (Math.abs(srcRow - row) == 1)) && !((Math.abs(srcCol - col) == 2) && (Math.abs(srcRow - row) == 2))) {
-    return false;
-  }
-  if (canJump(srcRow, srcCol)) {
-    if (Math.abs(srcRow - row) == 1) {
-      return false;
-    }
-    if (occupiedArray[row + (srcRow - row)/2][col + (srcCol - col)/2] == null) {
-      return false;
-    }
-  }
   if (jumpList.length > 0) {
     if (!jumpList.includes(checkerId)) {
       return false;
     }
   }
-  if (!(isAKing(checkerId))) {
-    if ((((srcRow - row) == -1) || ((srcRow - row) == -2)) && (document.getElementById(checkerId).classList.contains("black"))) {
-      return true;
-    }
-    else if ((((srcRow - row) == 1) || ((srcRow - row) == 2)) && (document.getElementById(checkerId).classList.contains("red"))) {
-      return true;
-    }
-    else {
+  if (!((row % 2 == 0) && (col % 2 == 1)) && !((row % 2 == 1) && (col % 2 == 0))) {
+    return false;
+  }
+  if (!cellIsVacant(row, col)) {
+    return false;
+  }
+  if (Math.abs(srcRow - row) == 1) {
+    if (jumpList.length > 0) {
       return false;
     }
+    if (!canMove(srcRow, srcCol) && (Math.abs(srcRow - row) == 1)) {
+      return false;
+    }
+  }
+  if (!canJump(srcRow, srcCol) && (Math.abs(srcRow - row) == 2)) {
+    return false;
+  }
+  if (canJump(srcRow, srcCol) && !hasOppositeChecker((row + (srcRow - row)/2), (col + (srcCol - col)/2), currentColor)) {
+    return false;
   }
   return true;
 }
@@ -489,12 +485,12 @@ function canMove(row, col) {
       }
     }
     else if (occupiedArray[row][col].classList.contains("black")) {
-      if (!cellIsVacant(row - 1, col - 1) && !cellIsVacant(row - 1, col + 1)) {
+      if (!cellIsVacant(row + 1, col - 1) && !cellIsVacant(row + 1, col + 1)) {
         return false;
       }
     }
     else if (occupiedArray[row][col].classList.contains("red")) {
-      if (!cellIsVacant(row + 1, col - 1) && !cellIsVacant(row + 1, col + 1)) {
+      if (!cellIsVacant(row - 1, col - 1) && !cellIsVacant(row - 1, col + 1)) {
         return false;
       }
     }
