@@ -11,12 +11,8 @@ var checkerArray = new Array(48);
 var clickedCheckerId = null;
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
-document.getElementById("colorButton").onclick = changePlayer;
 document.getElementById("promptButton").onclick = getComputersMove;
 document.getElementById("checkerboard").onclick = boardClick;
-var bodyRect = document.body.getBoundingClientRect(),
-  elemRect = document.getElementById("checkerboard").getBoundingClientRect(),
-  offset   = elemRect.top - bodyRect.top;
 //document.getElementById("checkerboard").ondrop = drop;
 //document.getElementById("checkerboard").ondragover=allowDrop;
 
@@ -37,6 +33,50 @@ function clearSpaces() {
   }
 
   context2D.fillStyle = "Gray";
+}
+
+function highlightSpaces(checkerId) {
+  var canvas = document.getElementById("checkerboard");
+  var context2D = canvas.getContext("2d");
+
+  for (var boardRow = 0; boardRow < 8; boardRow++) {
+    for (var boardCol = 0; boardCol < 8; boardCol++) {
+      // coordinates of the top-left corner
+	  var x = boardCol * 50;
+	  var y = boardRow * 50;
+      if ((boardRow + boardCol) % 2 == 1) {
+	    context2D.fillStyle = "SeaGreen";
+	    context2D.fillRect(x, y, 50, 50);
+	  }
+    }
+  }
+
+  context2D.fillStyle = "Gray";
+
+  if(isLegalMove(srcRow - 1, srcCol - 1, checkerId, currentColor)) {
+    context2D.fillRect((srcCol - 1) * 50, (srcRow - 1) * 50, 50, 50);
+  }
+  else if(isLegalMove(srcRow - 2, srcCol - 2, checkerId, currentColor)) {
+    context2D.fillRect((srcCol - 2) * 50, (srcRow - 2) * 50, 50, 50);
+  }
+  if(isLegalMove(srcRow - 1, srcCol + 1, checkerId, currentColor)) {
+    context2D.fillRect((srcCol + 1) * 50, (srcRow - 1) * 50, 50, 50);
+  }
+  else if(isLegalMove(srcRow - 2, srcCol + 2, checkerId, currentColor)) {
+    context2D.fillRect((srcCol + 2) * 50, (srcRow - 2) * 50, 50, 50);
+  }
+  if(isLegalMove(srcRow + 1, srcCol - 1, checkerId, currentColor)) {
+    context2D.fillRect((srcCol - 1) * 50, (srcRow + 1) * 50, 50, 50);
+  }
+  else if(isLegalMove(srcRow + 2, srcCol - 2, checkerId, currentColor)) {
+    context2D.fillRect((srcCol - 2) * 50, (srcRow + 2) * 50, 50, 50);
+  }
+  if(isLegalMove(srcRow + 1, srcCol + 1, checkerId, currentColor)) {
+    context2D.fillRect((srcCol + 1) * 50, (srcRow + 1) * 50, 50, 50);
+  }
+  else if(isLegalMove(srcRow + 2, srcCol + 2, checkerId, currentColor)) {
+    context2D.fillRect((srcCol + 2) * 50, (srcRow + 2) * 50, 50, 50);
+  }
 }
 
 function getComputersMove() {
@@ -111,17 +151,6 @@ function populateCheckersArray() {
   }
 }
 
-function changePlayer() {
-  color = document.getElementById("colorTextbox").value;
-  if (color == "red" || color == "black") {
-    currentColor = color;
-    document.getElementById("currentPlayer").innerHTML = "Current player: " + color;
-  }
-  else {
-    alert("Color must be either red or black.");
-  }
-}
-
 function setUpBoard() {
   var checkerIndex = 0;
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
@@ -141,16 +170,28 @@ function resetBoard() {
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
   for(var i = checkerIndex; i < 48; i++) {
     checkerArray[i].style.display = "none";
+    if(checkerArray[i].classList.contains("jumpAvailable")) {
+      checkerArray[i].classList.remove("jumpAvailable");
+    }
   }
-  var boardString = "bbbbbbbbbbbb--------rrrrrrrrrrrr";
+  var boardString = "b:bbbbbbbbbbbb--------rrrrrrrrrrrr";
   document.getElementById("boardInput").value = boardString;
   loadBoard(boardString);
   document.getElementById("blackCBox").checked == false;
   document.getElementById("redCBox").checked == false;
+  document.getElementById("forcedJump").innerHTML = "No forced jumps.";
 }
 
 function getBoard() {
   var boardString = "";
+
+  if (currentColor == "black") {
+    boardString += "b:";
+  }
+  else {
+    boardString += "r:";
+  }
+
   for(var i = 0; i < 64; i++) {
     var floorRow = Math.floor(i/8);
     if (((floorRow % 2 == 0) && (i % 2 == 1)) || ((floorRow % 2 == 1) && (i % 2 == 0))) {
@@ -180,10 +221,15 @@ function getBoard() {
 }
 
 function loadBoard(boardString) {
-  if (boardString.length != 32) {
+  if (boardString.length != 34) {
     return false;
   }
-  for (var i = 0; i < boardString.length; i++) {
+
+  if(((boardString.charAt(0) != "b") || (boardString.charAt(0) != "r")) && (boardString.charAt(1) != ":")) {
+    return false;
+  }
+
+  for (var i = 2; i < boardString.length; i++) {
     if ((boardString.charAt(i) != "b") && (boardString.charAt(i) != "r") && (boardString.charAt(i) != "B") && (boardString.charAt(i) != "R") && (boardString.charAt(i) != "-")) {
       return false;
     }
@@ -198,9 +244,17 @@ function loadBoard(boardString) {
       occupiedArray[i][j] = null;
     }
   }
-  for (var i = 0; i < boardString.length; i++) {
-    var floorRow = Math.floor(i/4);
-    var floorCol = (i % 4);
+
+  if (boardString.charAt(0) == "b") {
+    currentColor = "black";
+  }
+  else {
+    currentColor = "red";
+  }
+
+  for (var i = 2; i < boardString.length; i++) {
+    var floorRow = Math.floor((i - 2)/4);
+    var floorCol = ((i - 2) % 4);
 
     if (boardString.charAt(i) == "b") {
       var checkerId = "black" + blackCount;
@@ -269,18 +323,20 @@ function allowDrop(event) {
 }
 
 function drag(event) {
-  event.dataTransfer.setData("Text", event.target.id);
-  srcCol = Math.floor((event.clientX - 7 - 8) / 50);
-  srcRow = Math.floor((event.clientY - 7 - 80) / 50);
-  //var checkerObject = document.getElementById(event.target.id);
+  var checkerId = event.target.id;
+  event.dataTransfer.setData("Text", checkerId);
+
+  srcCol = Math.floor((event.clientX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
+  srcRow = Math.floor((event.clientY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
+
+  highlightSpaces(event.target.id);
 }
 
 function drop(event) {
-  clickMoves = [];
   clearSpaces();
   var checkerId = event.dataTransfer.getData("Text");
-  var destRow = Math.floor((event.clientY - 7 - 80) / 50);
-  var destCol = Math.floor((event.clientX - 7 - 8) / 50);
+  var destRow = Math.floor((event.clientY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
+  var destCol = Math.floor((event.clientX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
   if (isLegalMove(destRow, destCol, checkerId, currentColor)) {
     event.preventDefault();
     if (Math.abs(destRow - srcRow) == 1) {
@@ -303,60 +359,17 @@ function drop(event) {
 }
 
 function checkerClick(event) {
-  clickMoves = [];
   clickedCheckerId = event.target.id;
-  srcCol = Math.floor((event.clientX - 7 - 8) / 50);
-  srcRow = Math.floor((event.clientY - 7 - 80) / 50);
+  srcCol = Math.floor((event.clientX - document.getElementById(clickedCheckerId).parentElement.offsetLeft) / 50);
+  srcRow = Math.floor((event.clientY - document.getElementById(clickedCheckerId).parentElement.offsetTop) / 50);
 
-  var canvas = document.getElementById("checkerboard");
-  var context2D = canvas.getContext("2d");
-
-  for (var boardRow = 0; boardRow < 8; boardRow++) {
-    for (var boardCol = 0; boardCol < 8; boardCol++) {
-      // coordinates of the top-left corner
-	  var x = boardCol * 50;
-	  var y = boardRow * 50;
-      if ((boardRow + boardCol) % 2 == 1) {
-	    context2D.fillStyle = "SeaGreen";
-	    context2D.fillRect(x, y, 50, 50);
-	  }
-    }
-  }
-
-  context2D.fillStyle = "Gray";
-
-  if(isLegalMove(srcRow - 1, srcCol - 1, clickedCheckerId, currentColor)) {
-    context2D.fillRect((srcCol - 1) * 50, (srcRow - 1) * 50, 50, 50);
-  }
-  else if(isLegalMove(srcRow - 2, srcCol - 2, clickedCheckerId, currentColor)) {
-    context2D.fillRect((srcCol - 2) * 50, (srcRow - 2) * 50, 50, 50);
-  }
-  if(isLegalMove(srcRow - 1, srcCol + 1, clickedCheckerId, currentColor)) {
-    context2D.fillRect((srcCol + 1) * 50, (srcRow - 1) * 50, 50, 50);
-  }
-  else if(isLegalMove(srcRow - 2, srcCol + 2, clickedCheckerId, currentColor)) {
-    context2D.fillRect((srcCol + 2) * 50, (srcRow - 2) * 50, 50, 50);
-  }
-  if(isLegalMove(srcRow + 1, srcCol - 1, clickedCheckerId, currentColor)) {
-    context2D.fillRect((srcCol - 1) * 50, (srcRow + 1) * 50, 50, 50);
-  }
-  else if(isLegalMove(srcRow + 2, srcCol - 2, clickedCheckerId, currentColor)) {
-    context2D.fillRect((srcCol - 2) * 50, (srcRow + 2) * 50, 50, 50);
-  }
-  if(isLegalMove(srcRow + 1, srcCol + 1, clickedCheckerId, currentColor)) {
-    context2D.fillRect((srcCol + 1) * 50, (srcRow + 1) * 50, 50, 50);
-  }
-  else if(isLegalMove(srcRow + 2, srcCol + 2, clickedCheckerId, currentColor)) {
-    context2D.fillRect((srcCol + 2) * 50, (srcRow + 2) * 50, 50, 50);
-  }
+  highlightSpaces(clickedCheckerId);
 }
 
 function boardClick(event) {
-  clickMoves = [];
   clearSpaces();
-
-  var destCol = Math.floor((event.clientX - 7 - 8) / 50);
-  var destRow = Math.floor((event.clientY - 7 - 80) / 50);
+  var destCol = Math.floor((event.clientX - document.getElementById(clickedCheckerId).parentElement.offsetLeft) / 50);
+  var destRow = Math.floor((event.clientY - document.getElementById(clickedCheckerId).parentElement.offsetTop) / 50);
   if ((clickedCheckerId != null) && isLegalMove(destRow, destCol, clickedCheckerId, currentColor)) {
     event.preventDefault();
     if (Math.abs(destRow - srcRow) == 1) {
@@ -365,7 +378,7 @@ function boardClick(event) {
     else if (Math.abs(destRow - srcRow) == 2) {
       makeJumpMove(destRow, destCol, clickedCheckerId, currentColor);
     }
-    if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
+    if (((destRow == 7) || (destRow == 0)) && (!isAKing(clickedCheckerId))) {
       kingAPiece(destRow, destCol, clickedCheckerId);
     }
     var winner = checkForWinner();

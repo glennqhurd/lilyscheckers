@@ -1,5 +1,5 @@
 body {
-    background-color: lightblue;
+    background-color: lightblue !important;
 }
 
 div {
@@ -25,4 +25,8 @@ canvas {
 
 .jumpAvailable {
   border:1px solid #021a40;
+}
+
+.container div {
+    margin: 0 auto;
 }

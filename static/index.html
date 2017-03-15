@@ -14,60 +14,73 @@
 <body>
   <html>
 	<head>
+	    <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
 		<title>Checker Board</title>
 	</head>
 
 	<body>
-	<div>
-	  <h1>Lily's Checkers</h1>
-	</div>
-    <div id="boardset">
-      <canvas width=400 height=400 id="checkerboard" ondrop="drop(event)" ondragover="allowDrop(event)" z-axis=-20>
-       Your browser does not support the HTML5
-      </canvas>
-    </div>
-    <div>
-        <p id="currentPlayer">
-            Current player: black
-        </p>
-        <p id="forcedJump">
-            No forced jumps.
-        </p>
-        <p id="isThinking">
-            Computer is idle.
-        </p>
-        <input id="colorButton" type="button" value="Set current player (black/red)"/>
-        <input id="colorTextbox" type="text" value="black"/>
-    </div>
-    <div>
-        <p></p>
-        <input id="resetButton" type="button" value="Restart Game"/>
-        <input id="setButton" type="button" value="Set Board"/>
-        <input id="boardInput" type="text" value="bbbbbbbbbbbb--------rrrrrrrrrrrr" width=32/>
-    </div>
-    <div>
-        <p></p>
-        <input id="promptButton" type="button" value="Start/Continue AI move"/>
-        <input id="redCBox" type="checkbox" value="redCBox"> <label for="redCBox">Red computer player</label>
-        <input id="blackCBox" type="checkbox" value="blackCBox"> <label for="blackCBox">Black computer player</label>
-    </div>
-    <div>
-        <p>
-            Instructions: To play click and drag a piece on the board to another empty space.  You can also click a checker to select it
-            and then click on the board to move it there if the move is valid (a gray square).
-            You can only move in a diagonal line from the square of origin.
-            Jumps are forced so if there is at least 1 jump available you can choose among those available but cannot move any other piece.
-        </p>
-        <p>
-            Advanced Instructions: If you want to play with at least one computer player then you must mark either one or both of the checkboxes for whichever computer you want to use.
-            Make sure to wait for the computer to finish their move, the label "Computer is idle." will swap to "Computer is thinking." when the computer is active.  If you want to start the game
-            with the computer as black then you have to press the "Start/Continue AI move" button once.  Then the computer will automatically make a move when it's their turn.
-        </p>
-    </div>
+	    <div class="container">
+	        <div>
+	            <h1>Lily's Checkers</h1>
+	        </div>
+            <div id="boardset">
+                <canvas width=400 height=400 id="checkerboard" ondrop="drop(event)" ondragover="allowDrop(event)" z-axis=-20>
+                Your browser does not support the HTML5
+            </canvas>
+            </div>
+            <div>
+                <p id="currentPlayer">
+                    Current player: black
+                </p>
+                <p id="forcedJump">
+                    No forced jumps.
+                </p>
+                <p id="isThinking">
+                    Computer is idle.
+                </p>
+            </div>
+            <div>
+                <p></p>
+                <input id="resetButton" type="button" value="Restart Game"/>
+                <input id="setButton" type="button" value="Set Board"/>
+                <input id="boardInput" type="text" value="b:bbbbbbbbbbbb--------rrrrrrrrrrrr" width=32/>
+            </div>
+            <div>
+                <p></p>
+                <input id="promptButton" type="button" value="Start/Continue AI move"/>
+                <p></p>
+                <input id="redCBox" type="checkbox" value="redCBox"> <label for="redCBox">Red computer player</label>
+                <p></p>
+                <input id="blackCBox" type="checkbox" value="blackCBox"> <label for="blackCBox">Black computer player</label>
+            </div>
+            <div>
+                <h1>Instructions:</h1>
+                <p>
+                    To play click and drag a piece on the board to another empty space.  You can also click a checker to select it
+                    and then click on the board to move it there if the move is valid (a gray square).
+                    You can only move in a diagonal line from the square of origin.
+                    Jumps are forced so if there is at least 1 jump available you can choose among those available but cannot move any other piece.
+                </p>
+                <h2>Advanced Instructions:</h2>
+                <p>
+                    If you want to play with at least one computer player then you must mark either one or both of the checkboxes for whichever computer you want to use.
+                    Make sure to wait for the computer to finish their move, the label "Computer is idle." will swap to "Computer is thinking." when the computer is active.  If you want to start the game
+                    with the computer as black then you have to press the "Start/Continue AI move" button once.  Then the computer will automatically make a move when it's their turn.
+                </p>
+                <p>
+                    Warning: Right now do not scroll the window when playing the game, it messes with the board coordinates.
+                </p>
+            </div>
+        </div> <!-- .container -->
 	</body>
 </html>
 
     <script src="js/index.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 </body>
 </html>
