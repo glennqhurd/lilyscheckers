@@ -89,15 +89,8 @@ function getComputersMove() {
       if (this.readyState == 4 && this.status == 200) {
         console.log("entered if");
         document.getElementById("boardInput").value = this.responseText;
-        document.getElementById("colorTextbox").value = currentColor;
         setUpBoard();
         document.getElementById("promptButton").disabled = false;
-        if (currentColor == "red") {
-          currentColor = "black";
-        }
-        else {
-          currentColor = "red";
-        }
         clearJumpClasses();
 
         document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
@@ -117,7 +110,7 @@ function getComputersMove() {
         }
       }
     };
-    xhttp.open("GET", "checkers/" + currentColor + "/" + boardString, true);
+    xhttp.open("GET", "checkers/" + boardString, true);
     //xhttp.open("GET", "http://www.hurd-sullivan.com/checkers/black/" + boardString, true);
     xhttp.send();
   }
@@ -465,6 +458,12 @@ function isLegalMove(row, col, checkerId, color) {
       return false;
     }
     if (!canMove(srcRow, srcCol) && (Math.abs(srcRow - row) == 1)) {
+      return false;
+    }
+    if (currentColor == "black" && ((srcRow - row) > 0) && !isAKing(checkerId)) {
+      return false;
+    }
+    if (currentColor == "red" && ((srcRow - row) < 0) && !isAKing(checkerId)) {
       return false;
     }
   }
