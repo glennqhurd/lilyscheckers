@@ -12,9 +12,24 @@ var clickedCheckerId = null;
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("promptButton").onclick = getComputersMove;
+document.getElementById("promptButton").disabled = true;
 document.getElementById("checkerboard").onclick = boardClick;
+document.getElementById("redCBox").onclick = toggleMoveButton;
+document.getElementById("blackCBox").onclick = toggleMoveButton;
 //document.getElementById("checkerboard").ondrop = drop;
 //document.getElementById("checkerboard").ondragover=allowDrop;
+
+function toggleMoveButton() {
+  if(document.getElementById("redCBox").checked && currentColor == "red") {
+    document.getElementById("promptButton").disabled = false;
+  }
+  else if(document.getElementById("blackCBox").checked && currentColor == "black") {
+    document.getElementById("promptButton").disabled = false;
+  }
+  else {
+    document.getElementById("promptButton").disabled = true;
+  }
+}
 
 function clearSpaces() {
   var canvas = document.getElementById("checkerboard");
@@ -90,7 +105,8 @@ function getComputersMove() {
         console.log("entered if");
         document.getElementById("boardInput").value = this.responseText;
         setUpBoard();
-        document.getElementById("promptButton").disabled = false;
+        toggleMoveButton();
+        //document.getElementById("promptButton").disabled = false;
         clearJumpClasses();
 
         document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
@@ -173,6 +189,7 @@ function resetBoard() {
   document.getElementById("blackCBox").checked == false;
   document.getElementById("redCBox").checked == false;
   document.getElementById("forcedJump").innerHTML = "No forced jumps.";
+  document.getElementById("promptButton").disabled = true;
 }
 
 function getBoard() {
@@ -319,8 +336,8 @@ function drag(event) {
   var checkerId = event.target.id;
   event.dataTransfer.setData("Text", checkerId);
 
-  srcCol = Math.floor((event.clientX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
-  srcRow = Math.floor((event.clientY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
+  srcCol = Math.floor((event.pageX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
+  srcRow = Math.floor((event.pageY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
 
   if(canMove(srcRow, srcCol)) {
     document.getElementById(checkerId).setAttribute("draggable", true);
@@ -335,8 +352,8 @@ function drag(event) {
 function drop(event) {
   clearSpaces();
   var checkerId = event.dataTransfer.getData("Text");
-  var destRow = Math.floor((event.clientY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
-  var destCol = Math.floor((event.clientX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
+  var destRow = Math.floor((event.pageY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
+  var destCol = Math.floor((event.pageX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
   if (isLegalMove(destRow, destCol, checkerId, currentColor)) {
     event.preventDefault();
     if (Math.abs(destRow - srcRow) == 1) {
@@ -360,16 +377,16 @@ function drop(event) {
 
 function checkerClick(event) {
   clickedCheckerId = event.target.id;
-  srcCol = Math.floor((event.clientX - document.getElementById(clickedCheckerId).parentElement.offsetLeft) / 50);
-  srcRow = Math.floor((event.clientY - document.getElementById(clickedCheckerId).parentElement.offsetTop) / 50);
+  srcCol = Math.floor((event.pageX - document.getElementById(clickedCheckerId).parentElement.offsetLeft) / 50);
+  srcRow = Math.floor((event.pageY - document.getElementById(clickedCheckerId).parentElement.offsetTop) / 50);
 
   highlightSpaces(clickedCheckerId);
 }
 
 function boardClick(event) {
   clearSpaces();
-  var destCol = Math.floor((event.clientX - document.getElementById(clickedCheckerId).parentElement.offsetLeft) / 50);
-  var destRow = Math.floor((event.clientY - document.getElementById(clickedCheckerId).parentElement.offsetTop) / 50);
+  var destCol = Math.floor((event.pageX - document.getElementById(clickedCheckerId).parentElement.offsetLeft) / 50);
+  var destRow = Math.floor((event.pageY - document.getElementById(clickedCheckerId).parentElement.offsetTop) / 50);
   if ((clickedCheckerId != null) && isLegalMove(destRow, destCol, clickedCheckerId, currentColor)) {
     event.preventDefault();
     if (Math.abs(destRow - srcRow) == 1) {
@@ -549,6 +566,7 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   else {
     document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   }
+  toggleMoveButton();
 }
 
 function makeJumpMove(destRow, destCol, checkerId, color) {
@@ -579,6 +597,7 @@ function makeJumpMove(destRow, destCol, checkerId, color) {
   else {
     document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   }
+  toggleMoveButton();
 }
 
 function checkAdjacent(row, col, checkerId, color) {
