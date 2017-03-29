@@ -124,6 +124,7 @@ function getComputersMove() {
             document.getElementById("forcedJump").innerHTML = "No forced jumps.";
           }
         }
+        var winner = checkForWinner();
       }
     };
     xhttp.open("GET", "checkers/" + boardString, true);
@@ -169,6 +170,13 @@ function setUpBoard() {
   var boardString = document.getElementById("boardInput").value;
   loadBoard(boardString);
   var winner = checkForWinner();
+  if (boardString[0] == "b") {
+    currentColor = "black";
+  }
+  else {
+    currentColor = "red";
+  }
+  document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
   console.log(occupiedArray);
   console.log(checkerArray);
 }
@@ -296,6 +304,7 @@ function loadBoard(boardString) {
       document.getElementById(checkerId).style.display = "initial";
     }
   }
+  toggleMoveButton();
   return true;
 }
 
