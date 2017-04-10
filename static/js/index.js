@@ -9,6 +9,7 @@ for (var i = 0; i < 8; i++) {
 }
 var checkerArray = new Array(48);
 var clickedCheckerId = null;
+var savedBoard = "";
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("promptButton").onclick = getComputersMove;
@@ -103,7 +104,9 @@ function getComputersMove() {
       document.getElementById("promptButton").disabled = true;
       if (this.readyState == 4 && this.status == 200) {
         console.log("entered if");
+        var previousBoard = document.getElementById("boardInput").value;
         document.getElementById("boardInput").value = this.responseText;
+        moveString(previousBoard, document.getElementById("boardInput").value);
         setUpBoard();
         toggleMoveButton();
         //document.getElementById("promptButton").disabled = false;
@@ -194,8 +197,8 @@ function resetBoard() {
   var boardString = "b:bbbbbbbbbbbb--------rrrrrrrrrrrr";
   document.getElementById("boardInput").value = boardString;
   loadBoard(boardString);
-  document.getElementById("blackCBox").checked == false;
-  document.getElementById("redCBox").checked == false;
+  document.getElementById("blackCBox").checked = false;
+  document.getElementById("redCBox").checked = false;
   document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   document.getElementById("promptButton").disabled = true;
 }
@@ -348,12 +351,12 @@ function drag(event) {
   srcCol = Math.floor((event.pageX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
   srcRow = Math.floor((event.pageY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
 
-  if(canMove(srcRow, srcCol)) {
+  /*if(canMove(srcRow, srcCol)) {
     document.getElementById(checkerId).setAttribute("draggable", true);
   }
   else {
     document.getElementById(checkerId).setAttribute("draggable", false);
-  }
+  }*/
 
   highlightSpaces(event.target.id);
 }
@@ -363,19 +366,25 @@ function drop(event) {
   var checkerId = event.dataTransfer.getData("Text");
   var destRow = Math.floor((event.pageY - 7 - document.getElementById(checkerId).parentElement.offsetTop) / 50);
   var destCol = Math.floor((event.pageX - 7 - document.getElementById(checkerId).parentElement.offsetLeft) / 50);
+
   if (isLegalMove(destRow, destCol, checkerId, currentColor)) {
     event.preventDefault();
     if (Math.abs(destRow - srcRow) == 1) {
       makeSimpleMove(destRow, destCol, checkerId);
     }
     else if (Math.abs(destRow - srcRow) == 2) {
-      makeJumpMove(destRow, destCol, checkerId, currentColor);
+      if(savedBoard.length == 0) {
+        savedBoard = document.getElementById("boardInput").value;
+      }
+      makeJumpMove(destRow, destCol, checkerId, currentColor, savedBoard);
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
       kingAPiece(destRow, destCol, checkerId);
     }
     var winner = checkForWinner();
+    var previousBoard = document.getElementById("boardInput").value;
     document.getElementById("boardInput").value = getBoard();
+    //moveString(previousBoard, document.getElementById("boardInput").value);
     if (findIfChecked()) {
       getComputersMove();
     }
@@ -402,13 +411,15 @@ function boardClick(event) {
       makeSimpleMove(destRow, destCol, clickedCheckerId);
     }
     else if (Math.abs(destRow - srcRow) == 2) {
-      makeJumpMove(destRow, destCol, clickedCheckerId, currentColor);
+      makeJumpMove(destRow, destCol, clickedCheckerId, currentColor, document.getElementById("boardInput").value);
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(clickedCheckerId))) {
       kingAPiece(destRow, destCol, clickedCheckerId);
     }
     var winner = checkForWinner();
+    var previousBoard = document.getElementById("boardInput").value;
     document.getElementById("boardInput").value = getBoard();
+    //topLeftToRight(previousBoard, document.getElementById("boardInput").value);
     if (findIfChecked()) {
       getComputersMove();
     }
@@ -578,7 +589,7 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   toggleMoveButton();
 }
 
-function makeJumpMove(destRow, destCol, checkerId, color) {
+function makeJumpMove(destRow, destCol, checkerId, color, boardString) {
   placeChecker(destRow, destCol, checkerId, 0);
   var jumpedId = occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2].id;
   document.getElementById(jumpedId).style.display = "none";
@@ -599,6 +610,8 @@ function makeJumpMove(destRow, destCol, checkerId, color) {
     document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
     currentCheckerId = null;
     clearJumpClasses();
+    moveString(boardString, getBoard());
+    savedBoard = "";
   }
   if(jumpExists(currentColor).length > 0) {
     document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
@@ -796,4 +809,97 @@ function clearJumpClasses() {
       checkerArray[i].classList.remove("jumpAvailable");
     }
   }
+}
+
+function moveString(source, destination) {
+  var position = "";
+  for(var i = 2; i < 35; i++) {
+    if(source[i] != destination[i]) {
+      testPosition = findJumpMove(source, destination, i, position);
+      if((testPosition.length > 0) && (source[i] == source[0])) {
+        document.getElementById("moveRecord").innerHTML = testPosition;
+        return;
+      }
+      else if(source[i] == source[0]){
+        moveNumber1 = i - 1;
+      }
+      else if(source[i] == "-") {
+        moveNumber2 = i - 1;
+      }
+    }
+  }
+  document.getElementById("moveRecord").innerHTML = moveNumber1 + " - " + moveNumber2;
+}
+
+function findJumpMove(source, destination, index, position) {
+  // index between 2 - 34 but subtract 2 for math calculations
+  var topLeftOffset = ((Math.floor((index - 2) / 4) + 1) % 2) + 4;
+  var topRightOffset = ((Math.floor((index - 2) / 4) + 1) % 2) + 3;
+  var bottomLeftOffset = (Math.floor((index - 2) / 4) % 2) + 3;
+  var bottomRightOffset = (Math.floor((index - 2) / 4) % 2) + 4;
+
+  // Find if there is a jump from top left to bottom right
+  if((destination[index] == "-") && (destination[index + topLeftOffset] == "-")  && ((source[index + topLeftOffset] != source[0]) && (source[index + topLeftOffset] != "-"))) {
+    // These checks are in place because there is no valid jump from top left to bottom right
+    // from squares on the right edge of the board and squares on the bottom two rows (between 25 and 32)
+    if(!(((index - 1) % 4) == 3) && ((index - 1) < 25)) {
+      if(position.length == 0) {
+        position += (index - 1) + " - " + (index + 8);
+      }
+      else {
+        position += " - " + (index + 8);
+      }
+      position = findJumpMove(source, destination, index + 9, position);
+      return position;
+    }
+  }
+  // Find if there is a jump move from top right to bottom left
+  else if((destination[index] == "-") && (destination[index + topRightOffset] == "-") && ((source[index + topRightOffset] != source[0]) && (source[index + topRightOffset] != "-"))) {
+    // These checks are in place because there is no valid jump from top left to bottom right
+    // from squares on the left edge of the board and squares on the bottom two rows
+    if(!(((index - 1) % 4) == 0) && ((index - 1) < 25))
+    if(position.length == 0) {
+      position += (index - 1) + " - " + (index + 6);
+    }
+    else {
+      position += " - " + (index + 6);
+    }
+    position = findJumpMove(source, destination, index + 7, position);
+    return position;
+  }
+  // Find if there is a jump move from bottom left to top right
+  else if((destination[index] == "-") && (destination[index - bottomLeftOffset] == "-")  && ((source[index - bottomLeftOffset] != source[0]) && (source[index - bottomLeftOffset] != "-"))) {
+    // These checks are in place because there is no valid jump from bottom left to top right from squares at the top of the board
+    // and all of the squares on the right side of the board as well
+    if(!(((index - 1) % 4) == 3) && ((index - 1) > 8)) {
+      if(position.length == 0) {
+        position += (index - 1) + " - " + (index - 8);
+      }
+      else {
+        position += " - " + (index - 8);
+      }
+      position = findJumpMove(source, destination, index - 7, position);
+      return position;
+    }
+  }
+  // Find if there is a jump move from bottom right to top left
+  else if((destination[index] == "-") && (destination[index - bottomRightOffset] == "-")  && ((source[index - bottomRightOffset] != source[0]) && (source[index - bottomRightOffset] != "-"))) {
+    // These checks are in place because there is no valid jump from bottom left to top right from squares at the top of the board
+    // and all of the squares on the right side of the board
+    if(!(((index - 1) % 4) == 0) && ((index - 1) > 8)) {
+      if(position.length == 0) {
+        position += (index - 1) + " - " + (index - 10);
+      }
+      else {
+        position += " - " + (index - 10);
+      }
+      position = findJumpMove(source, destination, index - 9, position);
+      return position;
+    }
+  }
+  else {
+
+  }
+  document.getElementById("moveRecord").innerHTML = "No move made.";
+  return position;
 }
