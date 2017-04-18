@@ -9,7 +9,7 @@ for (var i = 0; i < 8; i++) {
 }
 var checkerArray = new Array(48);
 var clickedCheckerId = null;
-var savedBoard = "";
+
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("promptButton").onclick = getComputersMove;
@@ -373,10 +373,7 @@ function drop(event) {
       makeSimpleMove(destRow, destCol, checkerId);
     }
     else if (Math.abs(destRow - srcRow) == 2) {
-      if(savedBoard.length == 0) {
-        savedBoard = document.getElementById("boardInput").value;
-      }
-      makeJumpMove(destRow, destCol, checkerId, currentColor, savedBoard);
+      makeJumpMove(destRow, destCol, checkerId, currentColor);
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(checkerId))) {
       kingAPiece(destRow, destCol, checkerId);
@@ -411,7 +408,7 @@ function boardClick(event) {
       makeSimpleMove(destRow, destCol, clickedCheckerId);
     }
     else if (Math.abs(destRow - srcRow) == 2) {
-      makeJumpMove(destRow, destCol, clickedCheckerId, currentColor, document.getElementById("boardInput").value);
+      makeJumpMove(destRow, destCol, clickedCheckerId, currentColor);
     }
     if (((destRow == 7) || (destRow == 0)) && (!isAKing(clickedCheckerId))) {
       kingAPiece(destRow, destCol, clickedCheckerId);
@@ -570,6 +567,7 @@ function canJump(row, col) {
 }
 
 function makeSimpleMove(destRow, destCol, checkerId) {
+  boardString = getBoard();
   placeChecker(destRow, destCol, checkerId, 0);
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
   occupiedArray[srcRow][srcCol] = null;
@@ -586,11 +584,13 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   else {
     document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   }
+  moveString(boardString, document.getElementById("boardInput").value);
   toggleMoveButton();
 }
 
-function makeJumpMove(destRow, destCol, checkerId, color, boardString) {
+function makeJumpMove(destRow, destCol, checkerId, color) {
   placeChecker(destRow, destCol, checkerId, 0);
+  var boardString = document.getElementById("boardInput");
   var jumpedId = occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2].id;
   document.getElementById(jumpedId).style.display = "none";
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
@@ -610,8 +610,7 @@ function makeJumpMove(destRow, destCol, checkerId, color, boardString) {
     document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
     currentCheckerId = null;
     clearJumpClasses();
-    moveString(boardString, getBoard());
-    savedBoard = "";
+    moveString(boardString, document.getElementById("boardInput").value);
   }
   if(jumpExists(currentColor).length > 0) {
     document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
@@ -813,18 +812,22 @@ function clearJumpClasses() {
 
 function moveString(source, destination) {
   var position = "";
-  for(var i = 2; i < 35; i++) {
-    if(source[i] != destination[i]) {
-      testPosition = findJumpMove(source, destination, i, position);
-      if((testPosition.length > 0) && (source[i] == source[0])) {
+  var currentPlayer = source[0];
+  var moveNumber1 = null;
+  var moveNumber2 = null;
+  for(var j = 2; j < 35; j++) {
+    // savedBoards[i] is the source board, savedBoards[i + 1] is the destination board
+    if(source[j] != destination[j]) {
+      testPosition = findJumpMove(source, destination, j, position);
+      if((testPosition.length > 0) && (source[j].toLowerCase() == currentPlayer)) {
         document.getElementById("moveRecord").innerHTML = testPosition;
         return;
       }
-      else if(source[i] == source[0]){
-        moveNumber1 = i - 1;
+      else if((source[j] == currentPlayer) && (destination[j] == "-")){
+        moveNumber1 = j - 1;
       }
-      else if(source[i] == "-") {
-        moveNumber2 = i - 1;
+      else if((destination[j] == source[0]) && (source[j] == "-")) {
+        moveNumber2 = j - 1;
       }
     }
   }
@@ -836,7 +839,7 @@ function findJumpMove(source, destination, index, position) {
   var topLeftOffset = ((Math.floor((index - 2) / 4) + 1) % 2) + 4;
   var topRightOffset = ((Math.floor((index - 2) / 4) + 1) % 2) + 3;
   var bottomLeftOffset = (Math.floor((index - 2) / 4) % 2) + 3;
-  var bottomRightOffset = (Math.floor((index - 2) / 4) % 2) + 4;
+  var bottomRightOffset = (Math.floor(((index - 2) / 4)) % 2) + 4;
 
   // Find if there is a jump from top left to bottom right
   if((destination[index] == "-") && (destination[index + topLeftOffset] == "-")  && ((source[index + topLeftOffset] != source[0]) && (source[index + topLeftOffset] != "-"))) {
@@ -857,15 +860,16 @@ function findJumpMove(source, destination, index, position) {
   else if((destination[index] == "-") && (destination[index + topRightOffset] == "-") && ((source[index + topRightOffset] != source[0]) && (source[index + topRightOffset] != "-"))) {
     // These checks are in place because there is no valid jump from top left to bottom right
     // from squares on the left edge of the board and squares on the bottom two rows
-    if(!(((index - 1) % 4) == 0) && ((index - 1) < 25))
-    if(position.length == 0) {
-      position += (index - 1) + " - " + (index + 6);
+    if(!(((index - 1) % 4) == 0) && ((index - 1) < 25)) {
+      if(position.length == 0) {
+        position += (index - 1) + " - " + (index + 6);
+      }
+      else {
+        position += " - " + (index + 6);
+      }
+      position = findJumpMove(source, destination, index + 7, position);
+      return position;
     }
-    else {
-      position += " - " + (index + 6);
-    }
-    position = findJumpMove(source, destination, index + 7, position);
-    return position;
   }
   // Find if there is a jump move from bottom left to top right
   else if((destination[index] == "-") && (destination[index - bottomLeftOffset] == "-")  && ((source[index - bottomLeftOffset] != source[0]) && (source[index - bottomLeftOffset] != "-"))) {
@@ -896,9 +900,6 @@ function findJumpMove(source, destination, index, position) {
       position = findJumpMove(source, destination, index - 9, position);
       return position;
     }
-  }
-  else {
-
   }
   document.getElementById("moveRecord").innerHTML = "No move made.";
   return position;
