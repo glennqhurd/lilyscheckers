@@ -20,6 +20,10 @@ document.getElementById("blackCBox").onclick = toggleMoveButton;
 //document.getElementById("checkerboard").ondrop = drop;
 //document.getElementById("checkerboard").ondragover=allowDrop;
 
+/**
+ * function that disables/enables the promptButton object based on
+ * whether a computer player is selected that matches the current color
+ */
 function toggleMoveButton() {
   if(document.getElementById("redCBox").checked && currentColor == "red") {
     document.getElementById("promptButton").disabled = false;
@@ -32,6 +36,9 @@ function toggleMoveButton() {
   }
 }
 
+/**
+ * recolors the spaces on the board to their default color
+ */
 function clearSpaces() {
   var canvas = document.getElementById("checkerboard");
   var context2D = canvas.getContext("2d");
@@ -51,6 +58,10 @@ function clearSpaces() {
   context2D.fillStyle = "Gray";
 }
 
+/**
+ * changes the color of specific spaces based on what moves are valid for the
+ * checker represented by checkerId
+ */
 function highlightSpaces(checkerId) {
   var canvas = document.getElementById("checkerboard");
   var context2D = canvas.getContext("2d");
@@ -95,6 +106,10 @@ function highlightSpaces(checkerId) {
   }
 }
 
+/**
+ * when called requests the Python AI in flask to generate a move based on the
+ * current player.  Will wait until the program is done thinking then make changes
+ */
 function getComputersMove() {
   var boardString = document.getElementById("boardInput").value;
   if (boardString && !checkForWinner()) {
@@ -136,6 +151,10 @@ function getComputersMove() {
   }
 }
 
+/**
+ * Called at the start of the program to initialize the lists of checker objects
+ * including both regular and king checkers.
+ */
 function populateCheckersArray() {
   var blackCount = 1;
   var redCount = 1;
@@ -164,6 +183,11 @@ function populateCheckersArray() {
   }
 }
 
+/**
+ * Function that is called when the button setButton gets pressed.  Sets checker
+ * visibility to hidden for all checkers then uses loadBoard to arrange the board
+ * so that it matches the string in the entry field.
+ */
 function setUpBoard() {
   var checkerIndex = 0;
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
@@ -184,6 +208,10 @@ function setUpBoard() {
   console.log(checkerArray);
 }
 
+/**
+ * Like setUpBoard() but is used to return the board to the state it is at when
+ * the page is refreshed.
+ */
 function resetBoard() {
   var checkerIndex = 0;
   currentColor = "black";
@@ -203,6 +231,12 @@ function resetBoard() {
   document.getElementById("promptButton").disabled = true;
 }
 
+/**
+ * Returns a 34 character string representing the current board.  b represents
+ * black checkers, r represents red checkers, and a capital letter represents a
+ * king of that color.  - represents an empty space and the letter in index 0 is
+ * current player's color.
+ */
 function getBoard() {
   var boardString = "";
 
@@ -241,6 +275,10 @@ function getBoard() {
   return boardString;
 }
 
+/**
+ * Arranges the board based on the boardString passed to it in the function.  See
+ * getBoard() for translation of letters/symbols into board positions.
+ */
 function loadBoard(boardString) {
   if (boardString.length != 34) {
     return false;
@@ -311,12 +349,19 @@ function loadBoard(boardString) {
   return true;
 }
 
+/**
+ * Goes through the list of checkers and sets all checkers to hidden
+ */
 function hideAll() {
   for (i = 0; i < checkerArray.length; i++) {
     checkerArray[i].style.display = "none";
   }
 }
 
+/**
+ * Determines what the page does when first loaded or refreshed.  This includes
+ * setting up the board and creating the checkers pieces.
+ */
 window.onload = function() {
   var canvas = document.getElementById("checkerboard");
   var context2D = canvas.getContext("2d");
@@ -340,10 +385,18 @@ window.onload = function() {
   var temp = getBoard();
 };
 
+/**
+ * Allows the checker images to be dragged and dropped.
+ */
 function allowDrop(event) {
   event.preventDefault();
 }
 
+/**
+ * Function called when the checker image is initially dragged and moved.  It
+ * determines the starting point from which it was dragged and stores the data
+ * for later use by other functions.
+ */
 function drag(event) {
   var checkerId = event.target.id;
   event.dataTransfer.setData("Text", checkerId);
@@ -361,6 +414,13 @@ function drag(event) {
   highlightSpaces(event.target.id);
 }
 
+/**
+ * Function called when the image gets dropped onto the canvas board.  The end
+ * destination is recorded then isLegalMove gets call to determine if the drop
+ * was a legal move according to the checkers rules.  If it was the program
+ * determines whether the move was one or two spaces away and uses move functions
+ * to move the checker in the system.
+ */
 function drop(event) {
   clearSpaces();
   var checkerId = event.dataTransfer.getData("Text");
@@ -390,6 +450,10 @@ function drop(event) {
   clickedCheckerId = null;
 }
 
+/**
+ * Like drag except done by clicking the checker.  It records where the checker
+ * was clicked for later use by move functions.
+ */
 function checkerClick(event) {
   clickedCheckerId = event.target.id;
   srcCol = Math.floor((event.pageX - document.getElementById(clickedCheckerId).parentElement.offsetLeft) / 50);
@@ -398,6 +462,10 @@ function checkerClick(event) {
   highlightSpaces(clickedCheckerId);
 }
 
+/**
+ * Similar to drop except activated by clicking the board after clicking a checker.
+ * Also records the spot clicked and calls functions to determine the move made.
+ */
 function boardClick(event) {
   clearSpaces();
   var destCol = Math.floor((event.pageX - document.getElementById(clickedCheckerId).parentElement.offsetLeft) / 50);
@@ -425,6 +493,10 @@ function boardClick(event) {
   clickedCheckerId = null;
 }
 
+/**
+ * When called creates a checker object that has an image, an id, and src, alt,
+ * and classList elements based on the color
+ */
 function createChecker(id, color) {
   var image = document.createElement("IMG");
   image.id = id;
@@ -454,6 +526,12 @@ function createChecker(id, color) {
   return image;
 }
 
+/**
+ * Function that takes a checkerId, finds the king checker that is exactly 24
+ * spaces into the checker list, and places that king checker where the regular
+ * checker is.  Then it makes the regular checker hidden and the king checker
+ * hidden.
+ */
 function kingAPiece(row, col, checkerId) {
   if (!document.getElementById(checkerId).classList.contains("king")) {
     var index = findCheckerIndex(checkerId);
@@ -464,6 +542,10 @@ function kingAPiece(row, col, checkerId) {
   }
 }
 
+/**
+ * Function that makes checks for specific conditions that would make a given move
+ * illegal.  If it does not pass any of the if statements it is a legal move.
+ */
 function isLegalMove(row, col, checkerId, color) {
   var jumpList = jumpExists(color);
   // Check to see if the source checker being moved is the correct color
@@ -510,6 +592,11 @@ function isLegalMove(row, col, checkerId, color) {
   return true;
 }
 
+/**
+ * Function that checks to see if a proposed move is possible by checking if the
+ * row and column at that area of the board are occupied.  An occupied space
+ * cannot be moved to.
+ */
 function canMove(row, col) {
   if (!hasOppositeChecker(row, col, currentColor)) {
     if (isAKing(occupiedArray[row][col].id)) {
@@ -531,6 +618,11 @@ function canMove(row, col) {
   }
 }
 
+/**
+ * Like canMove except for jump moves.  There's a different function because a
+ * jump has to have an empty square for the destination as well as an occupied
+ * square with a checker of the opposite color.
+ */
 function canJump(row, col) {
   // true if cell is occupied, if a king check if in one of four directions the next checker is the opposite color and the next cell after that is empty...
   if (isAKing(occupiedArray[row][col].id)) {
@@ -566,6 +658,10 @@ function canJump(row, col) {
   return false;
 }
 
+/**
+ * Function that makes a simple move (one space away) by changing the board and
+ * the underlying lists that keep track of occupied spaces on the board.
+ */
 function makeSimpleMove(destRow, destCol, checkerId) {
   boardString = getBoard();
   placeChecker(destRow, destCol, checkerId, 0);
@@ -588,6 +684,10 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   toggleMoveButton();
 }
 
+/**
+ * Function that makes a jump move (two spaces away) by changing the board and
+ * the underlying lists that keep track of occupied spaces on the board.
+ */
 function makeJumpMove(destRow, destCol, checkerId, color) {
   placeChecker(destRow, destCol, checkerId, 0);
   var boardString = document.getElementById("boardInput");
@@ -621,6 +721,10 @@ function makeJumpMove(destRow, destCol, checkerId, color) {
   toggleMoveButton();
 }
 
+/**
+ * Function that checks spaces around the space defined by row and column to see
+ * if there is an opposite color checker nearby.
+ */
 function checkAdjacent(row, col, checkerId, color) {
   if ((currentCheckerId != null) && (checkerId != currentCheckerId)) {
     return false;
@@ -694,6 +798,11 @@ function checkAdjacent(row, col, checkerId, color) {
   return false;
 }
 
+/**
+ * Function that checks each checker on the board to determine if a possible
+ * jump move exists for the current player and if so returns a list of checkers
+ * that have to jump on that turn.
+ */
 function jumpExists(color) {
   var jumpList = [];
   for (var i = 0; i < occupiedArray.length; i++) {
@@ -715,6 +824,10 @@ function jumpExists(color) {
   return jumpList;
 }
 
+/**
+ * Function that checks to see if a player has won and then changes the labels
+ * on the site to show the winner.  Returns false if there was no winner.
+ */
 function checkForWinner() {
   var blackCount = 0;
   var redCount = 0;
@@ -742,6 +855,10 @@ function checkForWinner() {
   return false;
 }
 
+/**
+ * Function that checks to see if the square chosen by row and column has the
+ * opposite color of the parameter color.
+ */
 function hasOppositeChecker(row, col, color) {
   if ((row > 7) || (row < 0) || (col > 7) || (col < 0) || (occupiedArray[row][col] == null) || (occupiedArray[row][col].classList.contains(color))) {
     return false;
@@ -749,6 +866,9 @@ function hasOppositeChecker(row, col, color) {
   return true;
 }
 
+/**
+ * Function that checks to see if a specific square is empty
+ */
 function cellIsVacant(row, col) {
   if (row > 7 || row < 0 || col > 7 || col < 0) {
     return false;
@@ -759,6 +879,10 @@ function cellIsVacant(row, col) {
   return false;
 }
 
+/**
+ * Function to see if a row or column is out of bounds of the board, where less
+ * than 0 or greater than 7 are invalid rows and columns.
+ */
 function outOfBounds(row, col) {
   if ((row < 0) || (row > 7)) {
     return true;
@@ -769,20 +893,37 @@ function outOfBounds(row, col) {
   return false;
 }
 
+/**
+ * Function that returns true/false depending on if a checker contains the class
+ * "king" in its classList
+ */
 function isAKing(checkerId) {
   return document.getElementById(checkerId).classList.contains("king");
 }
 
+/**
+ * Places the checker during the initial placement at the start of the program.
+ * boardOffset is used because the sides of the webpage vary based on the browser
+ * used.
+ */
 function placeInitialChecker(row, col, checkerId, boardOffset) {
   document.getElementById(checkerId).style.top = (row * 50) + 7 + "px";
   document.getElementById(checkerId).style.left = (col * 100 + 7 + boardOffset) + "px";
 }
 
+/**
+ * Function that places a checker during the course of the program after the
+ * initial placement of pieces.
+ */
 function placeChecker(row, col, checkerId) {
   document.getElementById(checkerId).style.top = (row * 50 + 7) + "px";
   document.getElementById(checkerId).style.left = (col * 50 + 7) + "px";
 }
 
+/**
+ * Function that finds the checker's index in the checker array by looping
+ * through the list and comparing the id's
+ */
 function findCheckerIndex(checkerId) {
   for(var i = 0; i < checkerArray.length; i++) {
     if(checkerArray[i].id === checkerId) {
@@ -792,6 +933,10 @@ function findCheckerIndex(checkerId) {
   return -1;
 }
 
+/**
+ * Function that determines if the current player's color is also checked as a
+ * computer player using the checkboxes on the page. Returns true if they match.
+ */
 function findIfChecked() {
   if ((currentColor == "black") && (document.getElementById("blackCBox").checked == true)) {
     return true;
@@ -802,6 +947,11 @@ function findIfChecked() {
   return false;
 }
 
+/**
+ * Removes the tag "jumpAvailable" from the classList of every checker.  This
+ * tag gets applied when jumpExists is called.  Removing it refreshes the classList
+ * for the next turn.
+ */
 function clearJumpClasses() {
   for(var i = 0; i < checkerArray.length; i++) {
     if(checkerArray[i].classList.contains("jumpAvailable")) {
@@ -810,6 +960,12 @@ function clearJumpClasses() {
   }
 }
 
+/**
+ * Function that determines move numbers made in the format of move1 - move2 in
+ * the case of a single move or single jump.  Multiple jumps would have format
+ * like move1 - move2 - move3.  findJumpMove is used in cases of jumps including
+ * double and triple jumps.
+ */
 function moveString(source, destination) {
   var position = "";
   var currentPlayer = source[0];
@@ -834,6 +990,11 @@ function moveString(source, destination) {
   document.getElementById("moveRecord").innerHTML = moveNumber1 + " - " + moveNumber2;
 }
 
+/**
+ * Function that finds the move numbers of a jump move being made that uses
+ * recursive code to calculate multiple jumps in one turn and return a move string
+ * that represents it.
+ */
 function findJumpMove(source, destination, index, position) {
   // index between 2 - 34 but subtract 2 for math calculations
   var topLeftOffset = ((Math.floor((index - 2) / 4) + 1) % 2) + 4;
