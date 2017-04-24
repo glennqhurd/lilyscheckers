@@ -9,7 +9,7 @@ for (var i = 0; i < 8; i++) {
 }
 var checkerArray = new Array(48);
 var clickedCheckerId = null;
-
+var savedBoard = "";
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("promptButton").onclick = getComputersMove;
@@ -119,10 +119,10 @@ function getComputersMove() {
       document.getElementById("promptButton").disabled = true;
       if (this.readyState == 4 && this.status == 200) {
         console.log("entered if");
-        var previousBoard = document.getElementById("boardInput").value;
+        var previousBoard = getBoard();
         document.getElementById("boardInput").value = this.responseText;
-        moveString(previousBoard, document.getElementById("boardInput").value);
         setUpBoard();
+        moveString(previousBoard, getBoard());
         toggleMoveButton();
         //document.getElementById("promptButton").disabled = false;
         clearJumpClasses();
@@ -193,6 +193,9 @@ function setUpBoard() {
   document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
   for(var i = checkerIndex; i < 48; i++) {
     checkerArray[i].style.display = "none";
+    if(checkerArray[i].classList.contains("jumpAvailable")) {
+      checkerArray[i].classList.remove("jumpAvailable");
+    }
   }
   var boardString = document.getElementById("boardInput").value;
   loadBoard(boardString);
@@ -346,6 +349,8 @@ function loadBoard(boardString) {
     }
   }
   toggleMoveButton();
+  clearSpaces();
+  var jumpList = jumpExists(currentColor);
   return true;
 }
 
@@ -680,7 +685,7 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   else {
     document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   }
-  moveString(boardString, document.getElementById("boardInput").value);
+  moveString(boardString, getBoard());
   toggleMoveButton();
 }
 
@@ -690,7 +695,9 @@ function makeSimpleMove(destRow, destCol, checkerId) {
  */
 function makeJumpMove(destRow, destCol, checkerId, color) {
   placeChecker(destRow, destCol, checkerId, 0);
-  var boardString = document.getElementById("boardInput");
+  if(currentCheckerId == null) {
+    savedBoard = getBoard();
+  }
   var jumpedId = occupiedArray[destRow + (srcRow - destRow)/2][destCol + (srcCol - destCol)/2].id;
   document.getElementById(jumpedId).style.display = "none";
   occupiedArray[destRow][destCol] = occupiedArray[srcRow][srcCol];
@@ -710,7 +717,7 @@ function makeJumpMove(destRow, destCol, checkerId, color) {
     document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
     currentCheckerId = null;
     clearJumpClasses();
-    moveString(boardString, document.getElementById("boardInput").value);
+    moveString(savedBoard, getBoard());
   }
   if(jumpExists(currentColor).length > 0) {
     document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
@@ -979,10 +986,10 @@ function moveString(source, destination) {
         document.getElementById("moveRecord").innerHTML = testPosition;
         return;
       }
-      else if((source[j] == currentPlayer) && (destination[j] == "-")){
+      else if((source[j].toLowerCase() == currentPlayer) && (destination[j] == "-")){
         moveNumber1 = j - 1;
       }
-      else if((destination[j] == source[0]) && (source[j] == "-")) {
+      else if((destination[j].toLowerCase() == source[0]) && (source[j] == "-")) {
         moveNumber2 = j - 1;
       }
     }
@@ -1001,34 +1008,37 @@ function findJumpMove(source, destination, index, position) {
   var topRightOffset = ((Math.floor((index - 2) / 4) + 1) % 2) + 3;
   var bottomLeftOffset = (Math.floor((index - 2) / 4) % 2) + 3;
   var bottomRightOffset = (Math.floor(((index - 2) / 4)) % 2) + 4;
+  var betweenBoard = source;
 
   // Find if there is a jump from top left to bottom right
   if((destination[index] == "-") && (destination[index + topLeftOffset] == "-")  && ((source[index + topLeftOffset] != source[0]) && (source[index + topLeftOffset] != "-"))) {
     // These checks are in place because there is no valid jump from top left to bottom right
     // from squares on the right edge of the board and squares on the bottom two rows (between 25 and 32)
-    if(!(((index - 1) % 4) == 3) && ((index - 1) < 25)) {
+    if(!(((index - 1) % 4) == 0) && ((index - 1) < 25)) {
       if(position.length == 0) {
         position += (index - 1) + " - " + (index + 8);
       }
       else {
         position += " - " + (index + 8);
       }
-      position = findJumpMove(source, destination, index + 9, position);
+      betweenBoard = changeBoardElement(source, index + topLeftOffset, "-");
+      position = findJumpMove(betweenBoard, destination, index + 9, position);
       return position;
     }
   }
   // Find if there is a jump move from top right to bottom left
   else if((destination[index] == "-") && (destination[index + topRightOffset] == "-") && ((source[index + topRightOffset] != source[0]) && (source[index + topRightOffset] != "-"))) {
-    // These checks are in place because there is no valid jump from top left to bottom right
+    // These checks are in place because there is no valid jump from top right to bottom left
     // from squares on the left edge of the board and squares on the bottom two rows
-    if(!(((index - 1) % 4) == 0) && ((index - 1) < 25)) {
+    if(!(((index - 1) % 4) == 1) && ((index - 1) < 25)) {
       if(position.length == 0) {
         position += (index - 1) + " - " + (index + 6);
       }
       else {
         position += " - " + (index + 6);
       }
-      position = findJumpMove(source, destination, index + 7, position);
+      betweenBoard = changeBoardElement(source, index + topRightOffset, "-");
+      position = findJumpMove(betweenBoard, destination, index + 7, position);
       return position;
     }
   }
@@ -1036,32 +1046,40 @@ function findJumpMove(source, destination, index, position) {
   else if((destination[index] == "-") && (destination[index - bottomLeftOffset] == "-")  && ((source[index - bottomLeftOffset] != source[0]) && (source[index - bottomLeftOffset] != "-"))) {
     // These checks are in place because there is no valid jump from bottom left to top right from squares at the top of the board
     // and all of the squares on the right side of the board as well
-    if(!(((index - 1) % 4) == 3) && ((index - 1) > 8)) {
+    if(!(((index - 1) % 4) == 0) && ((index - 1) > 8)) {
       if(position.length == 0) {
         position += (index - 1) + " - " + (index - 8);
       }
       else {
         position += " - " + (index - 8);
       }
-      position = findJumpMove(source, destination, index - 7, position);
+      betweenBoard = changeBoardElement(source, index - bottomLeftOffset, "-");
+      position = findJumpMove(betweenBoard, destination, index - 7, position);
       return position;
     }
   }
   // Find if there is a jump move from bottom right to top left
   else if((destination[index] == "-") && (destination[index - bottomRightOffset] == "-")  && ((source[index - bottomRightOffset] != source[0]) && (source[index - bottomRightOffset] != "-"))) {
-    // These checks are in place because there is no valid jump from bottom left to top right from squares at the top of the board
-    // and all of the squares on the right side of the board
-    if(!(((index - 1) % 4) == 0) && ((index - 1) > 8)) {
+    // These checks are in place because there is no valid jump from bottom right to top left from squares at the top of the board
+    // and all of the squares on the left side of the board
+    if(!(((index - 1) % 4) == 1) && ((index - 1) > 8)) {
       if(position.length == 0) {
         position += (index - 1) + " - " + (index - 10);
       }
       else {
         position += " - " + (index - 10);
       }
-      position = findJumpMove(source, destination, index - 9, position);
+      betweenBoard = changeBoardElement(source, index - bottomRightOffset, "-");
+      position = findJumpMove(betweenBoard, destination, index - 9, position);
       return position;
     }
   }
   document.getElementById("moveRecord").innerHTML = "No move made.";
   return position;
+}
+
+function changeBoardElement(boardString, index, value) {
+  var splitBoard = boardString.split("");
+  splitBoard[index] = value;
+  return splitBoard.join("");
 }
