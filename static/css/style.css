@@ -35,6 +35,12 @@ div {
   position: relative;
 }
 
+#gameRecord {
+  border: 2px solid black;
+  height: 150px;
+  overflow: scroll;
+}
+
 canvas {
   position: relative;
 }

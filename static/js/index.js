@@ -984,6 +984,7 @@ function moveString(source, destination) {
       testPosition = findJumpMove(source, destination, j, position);
       if((testPosition.length > 0) && (source[j].toLowerCase() == currentPlayer)) {
         document.getElementById("moveRecord").innerHTML = testPosition;
+        appendMoves(document.getElementById("moveRecord").innerHTML);
         return;
       }
       else if((source[j].toLowerCase() == currentPlayer) && (destination[j] == "-")){
@@ -995,6 +996,7 @@ function moveString(source, destination) {
     }
   }
   document.getElementById("moveRecord").innerHTML = moveNumber1 + " - " + moveNumber2;
+  appendMoves(document.getElementById("moveRecord").innerHTML);
 }
 
 /**
@@ -1078,8 +1080,21 @@ function findJumpMove(source, destination, index, position) {
   return position;
 }
 
+/**
+ * Function that splits a string, changes a value, then reassembles the string
+ * and returns the result
+ */
 function changeBoardElement(boardString, index, value) {
   var splitBoard = boardString.split("");
   splitBoard[index] = value;
   return splitBoard.join("");
+}
+
+/**
+ * Function that changes gameRecordText by adding more text to it based on moves
+ * made
+ */
+function appendMoves(moveString) {
+  var boardString = getBoard();
+  document.getElementById("gameRecordText").innerHTML += "<br />" + boardString + "   " + moveString;
 }
