@@ -10,6 +10,7 @@ for (var i = 0; i < 8; i++) {
 var checkerArray = new Array(48);
 var clickedCheckerId = null;
 var savedBoard = "";
+var turnCounter = 1;
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("promptButton").onclick = getComputersMove;
@@ -122,7 +123,7 @@ function getComputersMove() {
         var previousBoard = getBoard();
         document.getElementById("boardInput").value = this.responseText;
         setUpBoard();
-        moveString(previousBoard, getBoard());
+        moveString(previousBoard, getBoard(), "computer");
         toggleMoveButton();
         //document.getElementById("promptButton").disabled = false;
         clearJumpClasses();
@@ -232,6 +233,10 @@ function resetBoard() {
   document.getElementById("redCBox").checked = false;
   document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   document.getElementById("promptButton").disabled = true;
+  turnCounter = 1;
+  while(document.getElementById("gameRecord").rows.length > 1) {
+    document.getElementById("gameRecord").deleteRow(-1);
+  }
 }
 
 /**
@@ -446,7 +451,6 @@ function drop(event) {
     var winner = checkForWinner();
     var previousBoard = document.getElementById("boardInput").value;
     document.getElementById("boardInput").value = getBoard();
-    //moveString(previousBoard, document.getElementById("boardInput").value);
     if (findIfChecked()) {
       getComputersMove();
     }
@@ -685,7 +689,7 @@ function makeSimpleMove(destRow, destCol, checkerId) {
   else {
     document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   }
-  moveString(boardString, getBoard());
+  moveString(boardString, getBoard(), "Player");
   toggleMoveButton();
 }
 
@@ -717,7 +721,7 @@ function makeJumpMove(destRow, destCol, checkerId, color) {
     document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
     currentCheckerId = null;
     clearJumpClasses();
-    moveString(savedBoard, getBoard());
+    moveString(savedBoard, getBoard(), "Player");
   }
   if(jumpExists(currentColor).length > 0) {
     document.getElementById("forcedJump").innerHTML = currentColor + " has at least one jump available.";
@@ -973,7 +977,7 @@ function clearJumpClasses() {
  * like move1 - move2 - move3.  findJumpMove is used in cases of jumps including
  * double and triple jumps.
  */
-function moveString(source, destination) {
+function moveString(source, destination, player) {
   var position = "";
   var currentPlayer = source[0];
   var moveNumber1 = null;
@@ -984,7 +988,7 @@ function moveString(source, destination) {
       testPosition = findJumpMove(source, destination, j, position);
       if((testPosition.length > 0) && (source[j].toLowerCase() == currentPlayer)) {
         document.getElementById("moveRecord").innerHTML = testPosition;
-        appendMoves(document.getElementById("moveRecord").innerHTML);
+        appendMoves(document.getElementById("moveRecord").innerHTML, player);
         return;
       }
       else if((source[j].toLowerCase() == currentPlayer) && (destination[j] == "-")){
@@ -996,7 +1000,7 @@ function moveString(source, destination) {
     }
   }
   document.getElementById("moveRecord").innerHTML = moveNumber1 + " - " + moveNumber2;
-  appendMoves(document.getElementById("moveRecord").innerHTML);
+  appendMoves(document.getElementById("moveRecord").innerHTML, player);
 }
 
 /**
@@ -1094,7 +1098,17 @@ function changeBoardElement(boardString, index, value) {
  * Function that changes gameRecordText by adding more text to it based on moves
  * made
  */
-function appendMoves(moveString) {
-  var boardString = getBoard();
-  document.getElementById("gameRecordText").innerHTML += "<br />" + boardString + "   " + moveString;
+function appendMoves(movementString, player) {
+  var table = document.getElementById("gameRecord");
+  var row = table.insertRow(-1);
+  var turnCell = row.insertCell(0);
+  var playerCell = row.insertCell(1);
+  var boardCell = row.insertCell(2);
+  var moveCell = row.insertCell(3);
+
+  turnCell.innerHTML = turnCounter;
+  turnCounter += 1;
+  playerCell.innerHTML = player;
+  boardCell.innerHTML = getBoard();
+  moveCell.innerHTML = movementString;
 }
