@@ -11,6 +11,8 @@ var checkerArray = new Array(48);
 var clickedCheckerId = null;
 var savedBoard = "";
 var turnCounter = 1;
+var select = document.getElementById("gameNumbers");
+select.options[select.options.length] = new Option('Numbers', null);
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
 document.getElementById("promptButton").onclick = getComputersMove;
@@ -18,6 +20,9 @@ document.getElementById("promptButton").disabled = true;
 document.getElementById("checkerboard").onclick = boardClick;
 document.getElementById("redCBox").onclick = toggleMoveButton;
 document.getElementById("blackCBox").onclick = toggleMoveButton;
+document.getElementById("sendButton").onclick = sendCheckersEmail;
+//document.getElementById("readButton").onclick = loadGameFromEmail;
+document.getElementById("findNumbersButton").onclick = findGameNumbers;
 //document.getElementById("checkerboard").ondrop = drop;
 //document.getElementById("checkerboard").ondragover=allowDrop;
 
@@ -112,8 +117,8 @@ function highlightSpaces(checkerId) {
  * current player.  Will wait until the program is done thinking then make changes
  */
 function getComputersMove() {
-  var boardString = document.getElementById("boardInput").value;
-  if (boardString && !checkForWinner()) {
+  var boardString = combineIntoURL();
+  if (boardString && !checkForWinner() && validDifficulty()) {
     var xhttp = new XMLHttpRequest();
     document.getElementById("forcedJump").innerHTML = "Computer's turn.";
     xhttp.onreadystatechange = function() {
@@ -146,8 +151,115 @@ function getComputersMove() {
         var winner = checkForWinner();
       }
     };
-    xhttp.open("GET", "checkers/" + boardString, true);
-    //xhttp.open("GET", "http://www.hurd-sullivan.com/checkers/black/" + boardString, true);
+    xhttp.open("GET", boardString, true);
+    xhttp.send();
+  }
+}
+
+function validDifficulty() {
+  if((document.getElementById('difficultySetting').value >= 1) && (document.getElementById('difficultySetting').value <= 10)) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function combineIntoURL() {
+  var boardString = getBoard();
+  var difficulty = document.getElementById('difficultySetting').value;
+  var player = boardString[0];
+  var board = boardString.slice(2);
+  console.log('player=' + player + '&board=' + board + '&difficulty=' + difficulty)
+  return 'checkers?player=' + player + '&board=' + board + '&difficulty=' + difficulty;
+}
+
+/**
+ * When called sends an email to pbmserv@gamerz.net to update the current game
+ */
+function sendCheckersEmail() {
+  if (checkSendInfo()) {
+    var xhttp = new XMLHttpRequest();
+    document.getElementById("sendButton").disabled = true;
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("emailErrorLog").innerHTML = "Message sent successfully.";
+        document.getElementById("sendButton").disabled = false;
+      }
+    };
+    var gameNumber = document.getElementById("gameNumber").value;
+    var user = document.getElementById("userName").value;
+    var password = document.getElementById("emailPassword").value;
+    var move = document.getElementById("makeMove").value;
+
+    xhttp.open("GET", "send_email?board_number=" + gameNumber + "&user=" + user + "&password=" + password + "&move=" + move, true);
+    xhttp.send();
+  }
+}
+
+function loadGameFromEmail() {
+  if (checkSendInfo()) {
+    var xhttp = new XMLHttpRequest();
+    document.getElementById("sendButton").disabled = true;
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("emailErrorLog").innerHTML = "Message sent successfully.";
+        document.getElementById("sendButton").disabled = false;
+      }
+    };
+    var gameNumber = document.getElementById("gameNumber").value;
+
+    xhttp.open("GET", "send_email?board_number=" + gameNumber + "&user=" + user + "&password=" + password + "&move=" + move, true);
+    xhttp.send();
+  }
+}
+
+function checkSendInfo() {
+  /*if (document.getElementById("gameNumber").value == "") {
+    document.getElementById("emailErrorLog").innerHTML = "Invalid game number.";
+    return false;
+  }*/
+  if (document.getElementById("userName").value == "") {
+    document.getElementById("emailErrorLog").innerHTML = "Invalid user name.";
+    return false;
+  }
+  if (document.getElementById("emailPassword").value == "") {
+    document.getElementById("emailErrorLog").innerHTML = "Invalid email password.";
+    return false;
+  }
+  if (document.getElementById("makeMove").value == "") {
+    document.getElementById("emailErrorLog").innerHTML = "Invalid move.";
+    return false;
+  }
+  return true;
+}
+
+function findGameNumbers() {
+  if (document.getElementById("userName").value != "") {
+    var xhttp = new XMLHttpRequest();
+    document.getElementById("findNumbersButton").disabled = true;
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("emailErrorLog").innerHTML = "Game numbers loaded.";
+        document.getElementById("findNumbersButton").disabled = false;
+        var gameDict = JSON.parse(this.responseText);
+        while (select.length > 0) {
+            select.remove(select.length-1);
+        }
+        if (gameDict != 0) {
+            for(key in gameDict) {
+              select.options[select.options.length] = new Option(gameDict[key], gameDict[key]);
+            }
+        }
+        else {
+            select.options[0] = new Option('Error', 'Error');
+        }
+      }
+    };
+
+    var user = document.getElementById("userName").value;
+
+    xhttp.open("GET", "read_numbers/" + user, true);
     xhttp.send();
   }
 }

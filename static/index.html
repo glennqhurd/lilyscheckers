@@ -55,6 +55,9 @@
                 <input id="blackCBox" type="checkbox" value="blackCBox"> <label for="blackCBox">Computer plays Black</label>
                 <p></p>
                 <input id="redCBox" type="checkbox" value="redCBox"> <label for="redCBox">Computer plays Red</label>
+                <p></p>
+                <label for="difficultySetting">Difficulty Setting (1-10): </label>
+                <input id="difficultySetting" type="text" value=1 size="3"/>
             </div>
             <p></p>
             <div id="gameRecordDiv">
@@ -69,23 +72,45 @@
                 </table>
             </div>
             <p></p>
-            <!--<div id="emailSection">
+            <div id="emailSection">
                 <h1>Play By Email Section</h1>
-                <label for="gameNumber">Game number: </label>
-                <input id="gameNumber" type="text" maxlength="6" size="6"/>
+                <p>Entry fields to make a move:</p>
+                <label for="gameNumbers">Current game: </label>
+                <select id="gameNumbers" length="6"></select>
                 <label for="userName">User Name For Email: </label>
                 <input id="userName" type="text" size="12"/>
                 <p></p>
                 <label for="emailPassword">Password: </label>
                 <input id="emailPassword" type="text" size="12"/>
-            </div>-->
+                <p></p>
+                <label for="makeMove">Move to be made: </label>
+                <input id="makeMove" type="text" size="12"/>
+                <p></p>
+                <input id="sendButton" type="button" value="Send email"/>
+                <p></p><br>
+                <p id="emailErrorLog">
+                    Ready to send email.
+                </p><br>
+                <p>Requires username:</p>
+                <input id="findNumbersButton" type="button" value="Find game numbers"/>
+            </div>
             <div id="instructions">
                 <h1>Instructions:</h1>
                 <p>
-                    To play click and drag a piece on the board to another empty space.  You can also click a checker to select it
-                    and then click on the board to move it there if the move is valid (a gray square).
-                    You can only move in a diagonal line from the square of origin.
-                    Jumps are forced so if there is at least 1 jump available you can choose among those available but cannot move any other piece.
+                    This website is used to play Checkers, a board game for two players.  The goal is to remove your opponent's pieces
+                    until they don't have any pieces on the board.  To move a piece you have to move away from your side of the board
+                    by one space diagonally.  If there is an enemy piece in the way but an empty space 2 spaces away you can jump over
+                    the enemy's piece and remove it from the board.  If you successfully jump and there is another jump available for
+                    the current piece being moved you can keep jumping and removing pieces.  Once you reach the end of the board your
+                    piece becomes a king.  Kings can move in any direction but still move the same distance (one square at a time) or
+                    by jumping in any direction.
+                </p>
+                <p>
+                    To play you can either click or drag a piece.  If you click a checker you can then click a gray square to move
+                    there.  Or you can drag a checker to a gray square and then drop it onto that square.  The square is gray to show
+                    that square is a valid move.  Jumps are forced so if there is at least 1 jump available you can choose among those
+                    available but cannot move any other piece.  The piece forced to jump will have a black square around the checker
+                    piece to show you.
                 </p>
                 <h2>Advanced Instructions:</h2>
                 <p>
