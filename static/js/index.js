@@ -21,7 +21,7 @@ document.getElementById("checkerboard").onclick = boardClick;
 document.getElementById("redCBox").onclick = toggleMoveButton;
 document.getElementById("blackCBox").onclick = toggleMoveButton;
 document.getElementById("sendButton").onclick = sendCheckersEmail;
-//document.getElementById("readButton").onclick = loadGameFromEmail;
+document.getElementById("matchByNumberButton").onclick = loadGameFromEmail;
 document.getElementById("findNumbersButton").onclick = findGameNumbers;
 //document.getElementById("checkerboard").ondrop = drop;
 //document.getElementById("checkerboard").ondragover=allowDrop;
@@ -198,19 +198,23 @@ function sendCheckersEmail() {
 }
 
 function loadGameFromEmail() {
-  if (checkSendInfo()) {
+  var e = document.getElementById("gameNumbers");
+  var gameNumber = parseInt(e.options[e.selectedIndex].text);
+  if (Number.isInteger(gameNumber)) {
     var xhttp = new XMLHttpRequest();
-    document.getElementById("sendButton").disabled = true;
+    document.getElementById("matchByNumberButton").disabled = true;
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        document.getElementById("emailErrorLog").innerHTML = "Message sent successfully.";
-        document.getElementById("sendButton").disabled = false;
+        document.getElementById("emailErrorLog").innerHTML = this.responseText;
+        document.getElementById("matchByNumberButton").disabled = false;
       }
     };
-    var gameNumber = document.getElementById("gameNumber").value;
 
-    xhttp.open("GET", "send_email?board_number=" + gameNumber + "&user=" + user + "&password=" + password + "&move=" + move, true);
+    xhttp.open("GET", "match_subject/" + gameNumber, true);
     xhttp.send();
+  }
+  else {
+    document.getElementById("emailErrorLog").innerHTML = "Game number selected needs to be an int."
   }
 }
 
@@ -235,7 +239,7 @@ function checkSendInfo() {
 }
 
 function findGameNumbers() {
-  if (document.getElementById("userName").value != "") {
+  if (document.getElementById("findUserName").value != "") {
     var xhttp = new XMLHttpRequest();
     document.getElementById("findNumbersButton").disabled = true;
     xhttp.onreadystatechange = function() {
@@ -257,7 +261,7 @@ function findGameNumbers() {
       }
     };
 
-    var user = document.getElementById("userName").value;
+    var user = document.getElementById("findUserName").value;
 
     xhttp.open("GET", "read_numbers/" + user, true);
     xhttp.send();

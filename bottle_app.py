@@ -8,6 +8,7 @@ from checkers_ai.checkers_email import translate_board_string
 from checkers_ai.checkers_email import read_game_list
 from checkers_ai.checkers_email import find_game_list
 from checkers_ai.checkers_email import read_game_number
+from checkers_ai.checkers_email import match_subject_to_number
 
 # Checkers
 # A simplistic checkers AI by Lyman Hurd.  Expects a 32 character string.  This
@@ -72,5 +73,9 @@ def find_games(game_user):
 def read_numbers(game_user):
     game_numbers = read_game_number('gqhprograms@gmail.com', 'checkers', game_user)
     return game_numbers
+
+@route('/match_subject/<game_number>')
+def match_subject(game_number):
+    return match_subject_to_number('gqhprograms@gmail.com', 'checkers', game_number)
 
 application = default_app()
