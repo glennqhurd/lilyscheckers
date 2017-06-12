@@ -2,6 +2,7 @@
 
 from bottle import default_app, route, request
 from checkers_ai.tree_search import find_move
+from checkers_ai.checkers_email import get_board_string
 from checkers_ai.checkers_email import send_email
 from checkers_ai.checkers_email import read_email_from_gmail
 from checkers_ai.checkers_email import translate_board_string
@@ -77,5 +78,9 @@ def read_numbers(game_user):
 @route('/match_subject/<game_number>')
 def match_subject(game_number):
     return match_subject_to_number('gqhprograms@gmail.com', 'checkers', game_number)
+
+@route('/retrieve_board_string/<game_number>')
+def retrieve_board_string(game_number):
+    return get_board_string('gqhprograms@gmail.com', 'checkers', game_number)
 
 application = default_app()

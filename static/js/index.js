@@ -205,12 +205,14 @@ function loadGameFromEmail() {
     document.getElementById("matchByNumberButton").disabled = true;
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("boardInput").value = this.responseText;
+        loadBoard(this.responseText);
         document.getElementById("emailErrorLog").innerHTML = this.responseText;
         document.getElementById("matchByNumberButton").disabled = false;
       }
     };
 
-    xhttp.open("GET", "match_subject/" + gameNumber, true);
+    xhttp.open("GET", "retrieve_board_string/" + gameNumber, true);
     xhttp.send();
   }
   else {
@@ -239,7 +241,7 @@ function checkSendInfo() {
 }
 
 function findGameNumbers() {
-  if (document.getElementById("findUserName").value != "") {
+  if (document.getElementById("userName").value != "") {
     var xhttp = new XMLHttpRequest();
     document.getElementById("findNumbersButton").disabled = true;
     xhttp.onreadystatechange = function() {
@@ -261,7 +263,7 @@ function findGameNumbers() {
       }
     };
 
-    var user = document.getElementById("findUserName").value;
+    var user = document.getElementById("userName").value;
 
     xhttp.open("GET", "read_numbers/" + user, true);
     xhttp.send();

@@ -77,7 +77,9 @@
                 <p>Entry fields to make a move:</p>
                 <label for="gameNumbers">Current game: </label>
                 <select id="gameNumbers" length="6"></select>
-                <label for="userName">User Name For Email: </label>
+                <input id="findNumbersButton" type="button" value="Find game numbers"/>
+                <p></p>
+                <label for="userName">Username For Email: </label>
                 <input id="userName" type="text" size="12"/>
                 <p></p>
                 <label for="emailPassword">Password: </label>
@@ -87,17 +89,11 @@
                 <input id="makeMove" type="text" size="12"/>
                 <p></p>
                 <input id="sendButton" type="button" value="Send email"/>
+                <input id="matchByNumberButton" type="button" value="Load game"/>
                 <p></p><br>
                 <p id="emailErrorLog">
                     Ready to send email.
-                </p><br>
-                <label for="findUserName">Username for finding games: </label>
-                <input id="findUserName" type="text" size="12"/>
-                <p>Finds game numbers based on username and places them in the dropdown menu.</p>
-                <input id="findNumbersButton" type="button" value="Find game numbers"/>
-                <p></p><br>
-                <label for="matchByNumberButton">Load game based on game number: </label>
-                <input id="matchByNumberButton" type="button" value="Load game"/>
+
             </div>
             <div id="instructions">
                 <h1>Instructions:</h1>
