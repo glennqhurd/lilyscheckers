@@ -223,7 +223,8 @@ function sendCheckersEmail() {
         document.getElementById("sendButton").disabled = false;
       }
     };
-    var gameNumber = document.getElementById("gameNumber").value;
+    var e = document.getElementById("gameNumbers");
+    var gameNumber = parseInt(e.options[e.selectedIndex].text);
     var user = document.getElementById("userName").value;
     var password = document.getElementById("emailPassword").value;
     var move = document.getElementById("makeMove").value;
@@ -242,7 +243,7 @@ function loadGameFromEmail() {
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
         document.getElementById("boardInput").value = this.responseText;
-        loadBoard(this.responseText);
+        setBoard(this.responseText);
         document.getElementById("emailErrorLog").innerHTML = this.responseText;
         document.getElementById("matchByNumberButton").disabled = false;
         hasMoved = false;
@@ -343,7 +344,7 @@ function populateCheckersArray() {
 
 /**
  * Function that is called when the button setButton gets pressed.  Sets checker
- * visibility to hidden for all checkers then uses loadBoard to arrange the board
+ * visibility to hidden for all checkers then uses setBoard to arrange the board
  * so that it matches the string in the entry field.
  */
 function setUpBoard() {
@@ -356,7 +357,7 @@ function setUpBoard() {
     }
   }
   var boardString = document.getElementById("boardInput").value;
-  loadBoard(boardString);
+  setBoard(boardString);
   var winner = checkForWinner();
   if (boardString[0] == "b") {
     currentColor = "black";
@@ -384,8 +385,30 @@ function resetBoard() {
     }
   }
   var boardString = "b:bbbbbbbbbbbb--------rrrrrrrrrrrr";
+  setBoard(boardString);
   document.getElementById("boardInput").value = boardString;
-  loadBoard(boardString);
+  document.getElementById("blackCBox").checked = false;
+  document.getElementById("redCBox").checked = false;
+  document.getElementById("forcedJump").innerHTML = "No forced jumps.";
+  document.getElementById("promptButton").disabled = true;
+  turnCounter = 1;
+  while(document.getElementById("gameRecord").rows.length > 1) {
+    document.getElementById("gameRecord").deleteRow(-1);
+  }
+}
+
+function clearBoard() {
+  var checkerIndex = 0;
+  currentColor = "black";
+  document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
+  for(var i = checkerIndex; i < 48; i++) {
+    checkerArray[i].style.display = "none";
+    if(checkerArray[i].classList.contains("jumpAvailable")) {
+      checkerArray[i].classList.remove("jumpAvailable");
+    }
+  }
+  var boardString = "b:bbbbbbbbbbbb--------rrrrrrrrrrrr";
+  document.getElementById("boardInput").value = boardString;
   document.getElementById("blackCBox").checked = false;
   document.getElementById("redCBox").checked = false;
   document.getElementById("forcedJump").innerHTML = "No forced jumps.";
@@ -444,7 +467,7 @@ function getBoard() {
  * Arranges the board based on the boardString passed to it in the function.  See
  * getBoard() for translation of letters/symbols into board positions.
  */
-function loadBoard(boardString) {
+function setBoard(boardString) {
   if (boardString.length != 34) {
     return false;
   }
@@ -458,6 +481,9 @@ function loadBoard(boardString) {
       return false;
     }
   }
+
+  clearBoard();
+
   var blackCount = 1;
   var redCount = 1;
   var blackKingCount = 1;
@@ -475,6 +501,8 @@ function loadBoard(boardString) {
   else {
     currentColor = "red";
   }
+
+  document.getElementById("currentPlayer").innerHTML = "Current player: " + currentColor;
 
   for (var i = 2; i < boardString.length; i++) {
     var floorRow = Math.floor((i - 2)/4);
@@ -499,6 +527,7 @@ function loadBoard(boardString) {
     else {
       var checkerId = null;
     }
+
     if ((floorRow % 2 == 0) && (checkerId != null)) {
       occupiedArray[floorRow][floorCol * 2 + 1] = document.getElementById(checkerId);
       placeInitialChecker(floorRow, floorCol, checkerId, 50);
