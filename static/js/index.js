@@ -11,6 +11,7 @@ var checkerArray = new Array(48);
 var clickedCheckerId = null;
 var savedBoard = "";
 var turnCounter = 1;
+var hasMoved = false;
 var select = document.getElementById("gameNumbers");
 select.options[select.options.length] = new Option('Numbers', null);
 document.getElementById("setButton").onclick = setUpBoard;
@@ -22,9 +23,36 @@ document.getElementById("redCBox").onclick = toggleMoveButton;
 document.getElementById("blackCBox").onclick = toggleMoveButton;
 document.getElementById("sendButton").onclick = sendCheckersEmail;
 document.getElementById("matchByNumberButton").onclick = loadGameFromEmail;
+document.getElementById("matchByNumberButton").disabled = true;
 document.getElementById("findNumbersButton").onclick = findGameNumbers;
+document.getElementById("findNumbersButton").disabled = true;
+document.getElementById("sendButton").disabled = true;
+document.getElementById("emailCBox").onclick = toggleEmailMode;
 //document.getElementById("checkerboard").ondrop = drop;
 //document.getElementById("checkerboard").ondragover=allowDrop;
+
+function toggleEmailMode() {
+  if (document.getElementById("emailCBox").checked) {
+    document.getElementById("setButton").disabled = true;
+    document.getElementById("resetButton").disabled = true;
+    document.getElementById("promptButton").disabled = true;
+    document.getElementById("redCBox").disabled = true;
+    document.getElementById("blackCBox").disabled = true;
+    document.getElementById("sendButton").disabled = true;
+    document.getElementById("matchByNumberButton").disabled = true;
+    document.getElementById("findNumbersButton").disabled = false;
+  }
+  else {
+    document.getElementById("setButton").disabled = false;
+    document.getElementById("resetButton").disabled = false;
+    document.getElementById("promptButton").disabled = false;
+    document.getElementById("redCBox").disabled = false;
+    document.getElementById("blackCBox").disabled = false;
+    document.getElementById("sendButton").disabled = true;
+    document.getElementById("matchByNumberButton").disabled = true;
+    document.getElementById("findNumbersButton").disabled = true;
+  }
+}
 
 /**
  * function that disables/enables the promptButton object based on
@@ -39,6 +67,14 @@ function toggleMoveButton() {
   }
   else {
     document.getElementById("promptButton").disabled = true;
+  }
+
+  if (document.getElementById("emailCBox").checked && !hasMoved) {
+    document.getElementById("sendButton").disabled = false;
+    hasMoved = true;
+  }
+  else {
+    document.getElementById("sendButton").disabled = true;
   }
 }
 
@@ -209,6 +245,7 @@ function loadGameFromEmail() {
         loadBoard(this.responseText);
         document.getElementById("emailErrorLog").innerHTML = this.responseText;
         document.getElementById("matchByNumberButton").disabled = false;
+        hasMoved = false;
       }
     };
 
@@ -256,6 +293,8 @@ function findGameNumbers() {
             for(key in gameDict) {
               select.options[select.options.length] = new Option(gameDict[key], gameDict[key]);
             }
+            document.getElementById("matchByNumberButton").disabled = false;
+            document.getElementById("sendButton").disabled = true;
         }
         else {
             select.options[0] = new Option('Error', 'Error');
@@ -1117,7 +1156,7 @@ function moveString(source, destination, player) {
       }
     }
   }
-  document.getElementById("moveRecord").innerHTML = moveNumber1 + " - " + moveNumber2;
+  document.getElementById("moveRecord").innerHTML = moveNumber1 + "-" + moveNumber2;
   appendMoves(document.getElementById("moveRecord").innerHTML, player);
 }
 
@@ -1140,10 +1179,10 @@ function findJumpMove(source, destination, index, position) {
     // from squares on the right edge of the board and squares on the bottom two rows (between 25 and 32)
     if(!(((index - 1) % 4) == 0) && ((index - 1) < 25)) {
       if(position.length == 0) {
-        position += (index - 1) + " - " + (index + 8);
+        position += (index - 1) + "-" + (index + 8);
       }
       else {
-        position += " - " + (index + 8);
+        position += "-" + (index + 8);
       }
       betweenBoard = changeBoardElement(source, index + topLeftOffset, "-");
       position = findJumpMove(betweenBoard, destination, index + 9, position);
@@ -1156,10 +1195,10 @@ function findJumpMove(source, destination, index, position) {
     // from squares on the left edge of the board and squares on the bottom two rows
     if(!(((index - 1) % 4) == 1) && ((index - 1) < 25)) {
       if(position.length == 0) {
-        position += (index - 1) + " - " + (index + 6);
+        position += (index - 1) + "-" + (index + 6);
       }
       else {
-        position += " - " + (index + 6);
+        position += "-" + (index + 6);
       }
       betweenBoard = changeBoardElement(source, index + topRightOffset, "-");
       position = findJumpMove(betweenBoard, destination, index + 7, position);
@@ -1172,10 +1211,10 @@ function findJumpMove(source, destination, index, position) {
     // and all of the squares on the right side of the board as well
     if(!(((index - 1) % 4) == 0) && ((index - 1) > 8)) {
       if(position.length == 0) {
-        position += (index - 1) + " - " + (index - 8);
+        position += (index - 1) + "-" + (index - 8);
       }
       else {
-        position += " - " + (index - 8);
+        position += "-" + (index - 8);
       }
       betweenBoard = changeBoardElement(source, index - bottomLeftOffset, "-");
       position = findJumpMove(betweenBoard, destination, index - 7, position);
@@ -1188,10 +1227,10 @@ function findJumpMove(source, destination, index, position) {
     // and all of the squares on the left side of the board
     if(!(((index - 1) % 4) == 1) && ((index - 1) > 8)) {
       if(position.length == 0) {
-        position += (index - 1) + " - " + (index - 10);
+        position += (index - 1) + "-" + (index - 10);
       }
       else {
-        position += " - " + (index - 10);
+        position += "-" + (index - 10);
       }
       betweenBoard = changeBoardElement(source, index - bottomRightOffset, "-");
       position = findJumpMove(betweenBoard, destination, index - 9, position);
