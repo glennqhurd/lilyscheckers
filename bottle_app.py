@@ -10,6 +10,10 @@ from checkers_ai.checkers_email import read_game_list
 from checkers_ai.checkers_email import find_game_list
 from checkers_ai.checkers_email import read_game_number
 from checkers_ai.checkers_email import match_subject_to_number
+from checkers_ai.checkers_email import get_current_player
+from checkers_ai.checkers_email import get_player_tuple
+
+EMAIL_ADDRESS = 'gqhprograms@gmail.com'
 
 # Checkers
 # A simplistic checkers AI by Lyman Hurd.  Expects a 32 character string.  This
@@ -41,11 +45,9 @@ def send_checkers_email():
     password = request.query.password or 'checkers'
     move = request.query.move
 
-    subject = 'move ' + board_number + ' ' + user + ' ' + password + ' ' + move
-    #subject = 'checkers'
+    subject = 'checkers move ' + board_number + ' ' + user + ' ' + password + ' ' + move
     """Send email based on subject line (user, pwd, recipient, subject, body)"""
-    return send_email('gqhprograms@gmail.com', 'checkers', 'pbmserv@gamerz.net', subject, "")
-    #return template('{board} {user} {password} {move}', board=board, user=user, password=password, move=move)
+    return send_email(EMAIL_ADDRESS, 'checkers', 'pbmserv@gamerz.net', subject, "")
 
 # Read email
 # Reads an email based on subject line
@@ -55,32 +57,40 @@ def read_checkers_email(subject):
     subject = ' '.join(split_subject)
     """Read email matching subject line exactly (user, pwd, subject_string)
     then translate it into a 32 char string"""
-    return translate_board_string(read_email_from_gmail('gqhprograms@gmail.com', 'checkers', subject))
+    return translate_board_string(read_email_from_gmail(EMAIL_ADDRESS, 'checkers', subject))
 
 # Read email about list of games in progress
 # Reads an email sent from pbmserv@gamerz.net about a list of games currently in progress
 @route('/read_list/<game_user>')
 def read_list(game_user):
-    return read_game_list('gqhprograms@gmail.com', 'checkers', game_user)
+    return read_game_list(EMAIL_ADDRESS, 'checkers', game_user)
 
 # Returns numbers of games in progress involving user name
 @route('/find_games/<game_user>')
 def find_games(game_user):
     #game_string = ' '.join(find_game_list('gqhprograms@gmail.com', 'checkers', game_user))
-    game_list = find_game_list('gqhprograms@gmail.com', 'checkers', game_user)
+    game_list = find_game_list(EMAIL_ADDRESS, 'checkers', game_user)
     return game_list
 
 @route('/read_numbers/<game_user>')
 def read_numbers(game_user):
-    game_numbers = read_game_number('gqhprograms@gmail.com', 'checkers', game_user)
+    game_numbers = read_game_number(EMAIL_ADDRESS, 'checkers', game_user)
     return game_numbers
 
 @route('/match_subject/<game_number>')
 def match_subject(game_number):
-    return match_subject_to_number('gqhprograms@gmail.com', 'checkers', game_number)
+    return match_subject_to_number(EMAIL_ADDRESS, 'checkers', game_number)
 
 @route('/retrieve_board_string/<game_number>')
 def retrieve_board_string(game_number):
-    return get_board_string('gqhprograms@gmail.com', 'checkers', game_number)
+    return get_board_string(EMAIL_ADDRESS, 'checkers', game_number)
+
+@route('/find_current_player/<game_number>')
+def find_current_player(game_number):
+    return get_current_player(EMAIL_ADDRESS, 'checkers', game_number)
+
+@route('/get_current_tuple/<game_user>')
+def get_current_tuple(game_user):
+    return get_player_tuple(EMAIL_ADDRESS, 'checkers', game_user)
 
 application = default_app()

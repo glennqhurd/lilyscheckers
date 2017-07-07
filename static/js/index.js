@@ -13,6 +13,40 @@ var savedBoard = "";
 var turnCounter = 1;
 var hasMoved = false;
 var select = document.getElementById("gameNumbers");
+var move_dict = {
+  "B8" : 1,
+  "D8" : 2,
+  "F8" : 3,
+  "H8" : 4,
+  "A7" : 5,
+  "C7" : 6,
+  "E7" : 7,
+  "G7" : 8,
+  "B6" : 9,
+  "D6" : 10,
+  "F6" : 11,
+  "H6" : 12,
+  "A5" : 13,
+  "C5" : 14,
+  "E5" : 15,
+  "G5" : 16,
+  "B4" : 17,
+  "D4" : 18,
+  "F4" : 19,
+  "H4" : 20,
+  "A3" : 21,
+  "C3" : 22,
+  "E3" : 23,
+  "G3" : 24,
+  "B2" : 25,
+  "D2" : 26,
+  "F2" : 27,
+  "H2" : 28,
+  "A1" : 29,
+  "C1" : 30,
+  "E1" : 31,
+  "G1" : 32
+}
 select.options[select.options.length] = new Option('Numbers', null);
 document.getElementById("setButton").onclick = setUpBoard;
 document.getElementById("resetButton").onclick = resetBoard;
@@ -227,7 +261,7 @@ function sendCheckersEmail() {
     var gameNumber = parseInt(e.options[e.selectedIndex].text);
     var user = document.getElementById("userName").value;
     var password = document.getElementById("emailPassword").value;
-    var move = document.getElementById("makeMove").value;
+    var move = document.getElementById("moveRecord").innerHTML;
 
     xhttp.open("GET", "send_email?board_number=" + gameNumber + "&user=" + user + "&password=" + password + "&move=" + move, true);
     xhttp.send();
@@ -259,10 +293,6 @@ function loadGameFromEmail() {
 }
 
 function checkSendInfo() {
-  /*if (document.getElementById("gameNumber").value == "") {
-    document.getElementById("emailErrorLog").innerHTML = "Invalid game number.";
-    return false;
-  }*/
   if (document.getElementById("userName").value == "") {
     document.getElementById("emailErrorLog").innerHTML = "Invalid user name.";
     return false;
@@ -271,10 +301,10 @@ function checkSendInfo() {
     document.getElementById("emailErrorLog").innerHTML = "Invalid email password.";
     return false;
   }
-  if (document.getElementById("makeMove").value == "") {
+  /*if (document.getElementById("makeMove").value == "") {
     document.getElementById("emailErrorLog").innerHTML = "Invalid move.";
     return false;
-  }
+  }*/
   return true;
 }
 
@@ -409,14 +439,14 @@ function clearBoard() {
   }
   var boardString = "b:bbbbbbbbbbbb--------rrrrrrrrrrrr";
   document.getElementById("boardInput").value = boardString;
-  document.getElementById("blackCBox").checked = false;
-  document.getElementById("redCBox").checked = false;
+  //document.getElementById("blackCBox").checked = false;
+  //document.getElementById("redCBox").checked = false;
   document.getElementById("forcedJump").innerHTML = "No forced jumps.";
   document.getElementById("promptButton").disabled = true;
-  turnCounter = 1;
-  while(document.getElementById("gameRecord").rows.length > 1) {
+  //turnCounter = 1;
+  /*while(document.getElementById("gameRecord").rows.length > 1) {
     document.getElementById("gameRecord").deleteRow(-1);
-  }
+  }*/
 }
 
 /**
@@ -1293,7 +1323,7 @@ function appendMoves(movementString, player) {
   var moveCell = row.insertCell(3);
 
   turnCell.innerHTML = turnCounter;
-  turnCounter += 1;
+  turnCounter = turnCounter + 1;
   playerCell.innerHTML = player;
   boardCell.innerHTML = getBoard();
   moveCell.innerHTML = movementString;
