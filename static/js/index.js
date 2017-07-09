@@ -322,7 +322,7 @@ function findGameNumbers() {
         }
         if (gameDict != 0) {
             for(key in gameDict) {
-              select.options[select.options.length] = new Option(gameDict[key], gameDict[key]);
+              select.options[select.options.length] = new Option(key + ' ' + gameDict[key], key);
             }
             document.getElementById("matchByNumberButton").disabled = false;
             document.getElementById("sendButton").disabled = true;
@@ -335,7 +335,7 @@ function findGameNumbers() {
 
     var user = document.getElementById("userName").value;
 
-    xhttp.open("GET", "read_numbers/" + user, true);
+    xhttp.open("GET", "/get_current_tuple/" + user, true);
     xhttp.send();
   }
 }
