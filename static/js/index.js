@@ -252,9 +252,11 @@ function sendCheckersEmail() {
     var xhttp = new XMLHttpRequest();
     document.getElementById("sendButton").disabled = true;
     xhttp.onreadystatechange = function() {
+      document.getElementById("emailErrorLog").innerHTML = "Sending email...";
       if (this.readyState == 4 && this.status == 200) {
         document.getElementById("emailErrorLog").innerHTML = "Message sent successfully.";
         document.getElementById("sendButton").disabled = false;
+        findGameNumbers();
       }
     };
     var e = document.getElementById("gameNumbers");
@@ -275,6 +277,7 @@ function loadGameFromEmail() {
     var xhttp = new XMLHttpRequest();
     document.getElementById("matchByNumberButton").disabled = true;
     xhttp.onreadystatechange = function() {
+      document.getElementById("emailErrorLog").innerHTML = "Loading game...";
       if (this.readyState == 4 && this.status == 200) {
         document.getElementById("boardInput").value = this.responseText;
         setBoard(this.responseText);
@@ -301,10 +304,6 @@ function checkSendInfo() {
     document.getElementById("emailErrorLog").innerHTML = "Invalid email password.";
     return false;
   }
-  /*if (document.getElementById("makeMove").value == "") {
-    document.getElementById("emailErrorLog").innerHTML = "Invalid move.";
-    return false;
-  }*/
   return true;
 }
 
@@ -313,6 +312,7 @@ function findGameNumbers() {
     var xhttp = new XMLHttpRequest();
     document.getElementById("findNumbersButton").disabled = true;
     xhttp.onreadystatechange = function() {
+      document.getElementById("emailErrorLog").innerHTML = "Finding game numbers...";
       if (this.readyState == 4 && this.status == 200) {
         document.getElementById("emailErrorLog").innerHTML = "Game numbers loaded.";
         document.getElementById("findNumbersButton").disabled = false;
